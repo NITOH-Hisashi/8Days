@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Eight Days</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <h1>Eight Days</h1>
+      <p class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</p>
+    </header>
+
+    <main>
+      <button @click="handleAuthClick" class="login-btn">Googleでログイン</button>
+
+      <section v-if="events.length" class="events">
+        <h2>次の8日間の予定</h2>
+        <ul>
+          <li v-for="event in events" :key="event.id">
+            <strong>{{ formatDate(event.start.dateTime || event.start.date) }}</strong>
+            <br>
+            {{ event.summary }}
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <a href="privacy.html">プライバシーポリシー</a>
+    </footer>
+  </div>
+
+  <script>
+    const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+    const API_KEY = 'YOUR_API_KEY';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+
+    Vue.createApp({
+      data() {
+        return {
+          events: []
+        };
+      },
+      methods: {
+        async initClient() {
+          return new Promise((resolve, reject) => {
+            gapi.load('client:auth2', async () => {
+              try {
+                await gapi.client.init({
+                  apiKey: API_KEY,
+                  clientId: CLIENT_ID,
+                  discoveryDocs: [DISCOVERY_DOC],
+                  scope: SCOPES,
+                });
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            });
+          });
+        },
+        async handleAuthClick() {
+          await this.initClient();
+          await gapi.auth2.getAuthInstance().signIn();
+          this.fetchEvents();
+        },
+        async fetchEvents() {
+          const calendarId = 'primary';
+          const now = new Date();
+          const maxDate = new Date();
+          maxDate.setDate(now.getDate() + 8);
+
+          const res = await gapi.client.calendar.events.list({
+            calendarId: calendarId,
+            timeMin: now.toISOString(),
+            timeMax: maxDate.toISOString(),
+            showDeleted: false,
+            singleEvents: true,
+            orderBy: 'startTime'
+          });
+
+          this.events = res.result.items;
+        },
+        formatDate(dateStr) {
+          const d = new Date(dateStr);
+          return d.toLocaleString('ja-JP', { dateStyle: 'full', timeStyle: 'short' });
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
