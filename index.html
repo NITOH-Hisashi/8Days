@@ -2,17 +2,17 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eight Days</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://unpkg.com/vue@3"></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <script src="config.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="app">
     <header class="header">
-    <h1>Eight Days</h1>
+      <h1>Eight Days</h1>
       <p class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</p>
     </header>
 
@@ -24,13 +24,13 @@
     <div v-else>
       <section v-if="events.length" class="events">
         <h2>次の8日間の予定</h2>
-      <p>{{ userName }} さんの予定（{{ events.length }} 件）</p>
-      <ul>
+        <p>{{ userName }} さんの予定（{{ events.length }} 件）</p>
+        <ul>
           <li v-for="event in events" :key="event.id">
             <strong>{{ formatDate(event.start.dateTime || event.start.date) }}</strong><br />
             {{ event.summary }}
           </li>
-      </ul>
+        </ul>
       </section>
     </div>
       
