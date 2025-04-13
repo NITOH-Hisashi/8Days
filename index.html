@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eight Days</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://unpkg.com/vue@3"></script>
-  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="config.js"></script>
+  <script src="main.js" defer></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -17,37 +18,18 @@
     </header>
 
     <main>
-    <p v-if="!isSignedIn">
-      ログインしてください。<br />
-      <button @click="handleAuthClick" class="login-btn">Googleでログイン</button>
-    </p>
-    <div v-else>
-      <section v-if="events.length" class="events">
-        <h2>次の8日間の予定</h2>
-        <p>{{ userName }} さんの予定（{{ events.length }} 件）</p>
+      <div v-if="!user">
+        <div id="g_id_signin"></div>
+      </div>
+      <div v-else>
+        <p>ようこそ、{{ user.name }} さん</p>
+        <h2>直近8日間の予定</h2>
         <ul>
           <li v-for="event in events" :key="event.id">
-            <strong>{{ formatDate(event.start.dateTime || event.start.date) }}</strong><br />
-            {{ event.summary }}
+            {{ event.start }} - {{ event.summary }}
           </li>
         </ul>
-      </section>
-    </div>
-      
-    <div id="g_id_onload"
-      data-client_id="YOUR_CLIENT_ID"
-      data-auto_prompt="false"
-      data-callback="handleCredentialResponse">
-    </div>
-    <div class="g_id_signin"
-      data-type="standard"
-      data-size="large"
-      data-theme="outline"
-      data-text="sign_in_with"
-      data-shape="rectangular"
-      data-logo_alignment="left">
-    </div>
-      
+      </div>
     </main>
 
     <footer>
@@ -58,8 +40,5 @@
       <p>Copyright AMUS IT Support</p>
     </footer>
   </div>
-
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="main.js"></script>
 </body>
 </html>
