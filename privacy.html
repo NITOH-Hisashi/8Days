@@ -1,17 +1,56 @@
+<!-- privacy.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>プライバシーポリシー | Eight Days</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>個人情報保護方針 | Eight Days</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 2em auto;
+      padding: 0 1em;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    a {
+      color: #007acc;
+      text-decoration: none;
+    }
+    footer {
+      margin-top: 3em;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <main style="padding: 2rem; max-width: 800px; margin: auto;">
-    <h1>プライバシーポリシー</h1>
-    <p>Eight Daysは、Google Calendar APIを利用して、あなたのカレンダー予定を最大8日間表示します。</p>
-    <p>当アプリは認証後、予定情報を一時的に取得しますが、保存や共有は一切行いません。</p>
-    <p>GoogleによるOAuth認証を使用しており、安全な接続でのみデータを取得します。</p>
-    <p>ご不明な点は <a href="mailto:your@email.com">your@email.com</a> までご連絡ください。</p>
-  </main>
+  <h1>Eight Days 個人情報保護方針</h1>
+
+  <h2>1. 基本方針</h2>
+  <p>「Eight Days」（以下「本アプリ」）は、ユーザーのプライバシーを尊重し、個人情報の保護に努めます。</p>
+
+  <h2>2. 取得する情報</h2>
+  <p>Google OAuth 認証を通じて、ユーザーの Google カレンダーの読み取り専用情報（予定の件名、時間など）を取得します。</p>
+
+  <h2>3. 利用目的</h2>
+  <p>取得した情報は、本アプリの画面上に8日間の予定を表示する目的にのみ使用されます。</p>
+
+  <h2>4. 情報の保存と共有</h2>
+  <p>取得した個人情報は保存されず、外部への共有・送信も行いません。</p>
+
+  <h2>5. 第三者提供について</h2>
+  <p>ユーザーの同意なしに、第三者に情報を提供することはありません。</p>
+
+  <h2>6. お問い合わせ</h2>
+  <p>本方針に関するお問い合わせは、以下のGitHub Issuesページをご利用ください。</p>
+  <p><a href="https://github.com/nitoh-hisashi/eight-days/issues" target="_blank">https://github.com/nitoh-hisashi/eight-days/issues</a></p>
+
+  <footer>
+    <p><a href="index.html">アプリのトップページへ戻る</a></p>
+    <p>Copyright AMUS IT Support</p>
+  </footer>
 </body>
 </html>
