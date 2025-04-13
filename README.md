@@ -1,4 +1,5 @@
-# eight-days
+# Eight Days (8Days)
+eight-days
 Google Calendarを8日間表示するVueアプリ
 
 - Vue（CDN）で構築されたSPA
