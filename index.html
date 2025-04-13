@@ -1,17 +1,37 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eight Days</title>
+  <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app">
     <h1>Eight Days</h1>
-    <div id="signin"></div>
-    <div id="calendar"></div>
+    <p v-if="!isSignedIn">ログインしてください。</p>
+    <div v-else>
+      <p>{{ userName }} さんの予定（{{ events.length }} 件）</p>
+      <ul>
+        <li v-for="event in events" :key="event.id">{{ formatDate(event.start.dateTime || event.start.date) }} - {{ event.summary }}</li>
+      </ul>
+    </div>
+    <div id="g_id_onload"
+      data-client_id="YOUR_CLIENT_ID"
+      data-auto_prompt="false"
+      data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="outline"
+      data-text="sign_in_with"
+      data-shape="rectangular"
+      data-logo_alignment="left">
+    </div>
   </div>
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="main.js"></script>
 </body>

@@ -1,90 +1,54 @@
-let tokenClient;
-let gapiInited = false;
-let gisInited = false;
+const { createApp } = Vue;
 
-const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
-const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
-const calendarId = 'primary';
-
-function gapiLoaded() {
-  gapi.load('client', initializeGapiClient);
-}
-
-async function initializeGapiClient() {
-  await gapi.client.init({
-    apiKey: 'YOUR_API_KEY',
-    discoveryDocs: [DISCOVERY_DOC],
-  });
-  gapiInited = true;
-  maybeEnableButtons();
-}
-
-function gisLoaded() {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: 'YOUR_CLIENT_ID',
-    scope: SCOPES,
-    callback: (tokenResponse) => {
-      if (tokenResponse.error) throw tokenResponse;
-      listUpcomingEvents();
+const app = createApp({
+  data() {
+    return {
+      isSignedIn: false,
+      userName: '',
+      events: []
+    };
+  },
+  methods: {
+    formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleString('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     },
-  });
-  gisInited = true;
-  maybeEnableButtons();
-}
-
-function maybeEnableButtons() {
-  if (gapiInited && gisInited) {
-    document.getElementById('signin').innerHTML = '<button onclick="handleAuthClick()">Sign In</button>';
+    fetchEvents(token) {
+      fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + new Date().toISOString() +
+        '&timeMax=' + new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString() +
+        '&singleEvents=true&orderBy=startTime', {
+        headers: {
+          Authorization: 'Bearer ' + token
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          this.events = data.items || [];
+        });
+    }
   }
+});
+
+app.mount('#app');
+
+window.handleCredentialResponse = (response) => {
+  const data = parseJwt(response.credential);
+  app._instance.data.userName = data.name;
+  app._instance.data.isSignedIn = true;
+  app._instance.ctx.fetchEvents(response.credential);
+};
+
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(jsonPayload);
 }
-
-function handleAuthClick() {
-  tokenClient.requestAccessToken({ prompt: 'consent' });
-}
-
-async function listUpcomingEvents() {
-  let response;
-  try {
-    const now = new Date();
-    const maxDate = new Date(now);
-    maxDate.setDate(now.getDate() + 8);
-    response = await gapi.client.calendar.events.list({
-      calendarId: calendarId,
-      timeMin: now.toISOString(),
-      timeMax: maxDate.toISOString(),
-      showDeleted: false,
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
-  } catch (err) {
-    console.error(err);
-    return;
-  }
-
-  const events = response.result.items;
-  const calendarDiv = document.getElementById('calendar');
-  if (!events || events.length === 0) {
-    calendarDiv.innerText = '予定は見つかりませんでした。';
-    return;
-  }
-
-  const ul = document.createElement('ul');
-  events.forEach(event => {
-    const li = document.createElement('li');
-    const when = event.start.dateTime || event.start.date;
-    li.textContent = `${when} - ${event.summary}`;
-    ul.appendChild(li);
-  });
-  calendarDiv.appendChild(ul);
-}
-
-// 初期化スクリプトの読み込み
-const gapiScript = document.createElement('script');
-gapiScript.src = 'https://apis.google.com/js/api.js';
-gapiScript.onload = gapiLoaded;
-document.head.appendChild(gapiScript);
-
-const gisScript = document.createElement('script');
-gisScript.src = 'https://accounts.google.com/gsi/client';
-gisScript.onload = gisLoaded;
-document.head.appendChild(gisScript);
