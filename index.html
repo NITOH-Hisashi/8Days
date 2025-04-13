@@ -9,14 +9,29 @@
 </head>
 <body>
   <div id="app">
+    <header class="header">
     <h1>Eight Days</h1>
-    <p v-if="!isSignedIn">ログインしてください。</p>
+      <p class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</p>
+    </header>
+
+    <main>
+    <p v-if="!isSignedIn">
+      ログインしてください。<br />
+      <button @click="handleAuthClick" class="login-btn">Googleでログイン</button>
+    </p>
     <div v-else>
+      <section v-if="events.length" class="events">
+        <h2>次の8日間の予定</h2>
       <p>{{ userName }} さんの予定（{{ events.length }} 件）</p>
       <ul>
-        <li v-for="event in events" :key="event.id">{{ formatDate(event.start.dateTime || event.start.date) }} - {{ event.summary }}</li>
+          <li v-for="event in events" :key="event.id">
+            <strong>{{ formatDate(event.start.dateTime || event.start.date) }}</strong><br />
+            {{ event.summary }}
+          </li>
       </ul>
+      </section>
     </div>
+      
     <div id="g_id_onload"
       data-client_id="YOUR_CLIENT_ID"
       data-auto_prompt="false"
@@ -30,6 +45,16 @@
       data-shape="rectangular"
       data-logo_alignment="left">
     </div>
+      
+    </main>
+
+    <footer>
+      <p>
+        <a href="terms.html" target="_blank">利用規約</a> |
+        <a href="privacy.html" target="_blank">個人情報保護方針</a>
+      </p>
+      <p>Copyright AMUS IT Support</p>
+    </footer>
   </div>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
