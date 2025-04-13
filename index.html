@@ -1,109 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eight Days</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://unpkg.com/vue@3"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://apis.google.com/js/api.js"></script>
-  <script src="config.js"></script>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app">
-    <header class="header">
-      <h1>Eight Days</h1>
-      <p class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</p>
-    </header>
-
-    <main>
-      <button @click="handleAuthClick" class="login-btn">Googleでログイン</button>
-
-      <section v-if="events.length" class="events">
-        <h2>次の8日間の予定</h2>
-        <ul>
-          <li v-for="event in events" :key="event.id">
-            <strong>{{ formatDate(event.start.dateTime || event.start.date) }}</strong><br />
-            {{ event.summary }}
-          </li>
-        </ul>
-      </section>
-    </main>
-
-    <footer>
-      <a href="privacy.html">プライバシーポリシー</a>
-    </footer>
+    <h1>Eight Days</h1>
+    <div id="signin"></div>
+    <div id="calendar"></div>
   </div>
-
-  <script>
-    const CLIENT_ID = GOOGLE_CONFIG.CLIENT_ID;
-    const API_KEY = GOOGLE_CONFIG.API_KEY;
-    const DISCOVERY_DOC = GOOGLE_CONFIG.DISCOVERY_DOC;
-    const SCOPES = GOOGLE_CONFIG.SCOPES;
-
-    let tokenClient;
-
-    Vue.createApp({
-      data() {
-        return {
-          events: [],
-        };
-      },
-      methods: {
-        async initializeGapiClient() {
-          await new Promise((resolve) => {
-            gapi.load('client', async () => {
-              await gapi.client.init({
-                apiKey: API_KEY,
-                discoveryDocs: [DISCOVERY_DOC],
-              });
-              resolve();
-            });
-          });
-        },
-        async handleAuthClick() {
-          if (!tokenClient) {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-              client_id: CLIENT_ID,
-              scope: SCOPES,
-              callback: async (tokenResponse) => {
-                if (tokenResponse.access_token) {
-                  await this.fetchEvents();
-                }
-              },
-            });
-          }
-          tokenClient.requestAccessToken();
-        },
-        async fetchEvents() {
-          const now = new Date();
-          const maxDate = new Date();
-          maxDate.setDate(now.getDate() + 8);
-
-          const response = await gapi.client.calendar.events.list({
-            calendarId: 'primary',
-            timeMin: now.toISOString(),
-            timeMax: maxDate.toISOString(),
-            showDeleted: false,
-            singleEvents: true,
-            orderBy: 'startTime',
-          });
-
-          this.events = response.result.items;
-        },
-        formatDate(dateStr) {
-          const d = new Date(dateStr);
-          return d.toLocaleString('ja-JP', {
-            dateStyle: 'full',
-            timeStyle: 'short',
-          });
-        },
-      },
-      mounted() {
-        this.initializeGapiClient();
-      },
-    }).mount('#app');
-  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="main.js"></script>
 </body>
 </html>
