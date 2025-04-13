@@ -1,3 +1,10 @@
+const CLIENT_ID = GOOGLE_CONFIG.CLIENT_ID;
+const API_KEY = GOOGLE_CONFIG.API_KEY;
+const DISCOVERY_DOC = GOOGLE_CONFIG.DISCOVERY_DOC;
+const SCOPES = GOOGLE_CONFIG.SCOPES;
+
+let tokenClient;
+
 const { createApp } = Vue;
 
 const app = createApp({
@@ -9,6 +16,56 @@ const app = createApp({
     };
   },
   methods: {
+    async initializeGapiClient() {
+      await new Promise((resolve) => {
+        gapi.load('client', async () => {
+          await gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: [DISCOVERY_DOC],
+          });
+          resolve();
+        });
+      });
+    },
+    async handleAuthClick() {
+      if (!tokenClient) {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: async (tokenResponse) => {
+            if (tokenResponse.access_token) {
+              await this.fetchEvents();
+            }
+          },
+        });
+      }
+      tokenClient.requestAccessToken();
+    },
+    async fetchEvents() {
+      const now = new Date();
+      const maxDate = new Date();
+      maxDate.setDate(now.getDate() + 8);
+
+      const response = await gapi.client.calendar.events.list({
+        calendarId: 'primary',
+        timeMin: now.toISOString(),
+        timeMax: maxDate.toISOString(),
+        showDeleted: false,
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
+
+      this.events = response.result.items;
+    /**
+    },
+    formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleString('ja-JP', {
+        dateStyle: 'full',
+        timeStyle: 'short',
+      });
+    */
+    },
     formatDate(dateStr) {
       const date = new Date(dateStr);
       return date.toLocaleString('ja-JP', {
@@ -18,6 +75,7 @@ const app = createApp({
         hour: '2-digit',
         minute: '2-digit'
       });
+    /**
     },
     fetchEvents(token) {
       fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + new Date().toISOString() +
@@ -31,6 +89,7 @@ const app = createApp({
         .then(data => {
           this.events = data.items || [];
         });
+        */
     }
   }
 });
