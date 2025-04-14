@@ -7,7 +7,8 @@ createApp({
       user: null,
       eventsByDate: {},
       startDate: today,
-      dateRange: []
+      dateRange: [],
+      accessToken: null
     }
   },
   methods: {
@@ -18,11 +19,18 @@ createApp({
     },
     getAccessToken() {
       return new Promise((resolve) => {
-        google.accounts.oauth2.initTokenClient({
-          client_id: CONFIG.CLIENT_ID,
-          scope: 'https://www.googleapis.com/auth/calendar.readonly',
-          callback: (tokenResponse) => resolve(tokenResponse.access_token)
-        }).requestAccessToken()
+        if (this.accessToken) {
+          resolve(this.accessToken)
+        } else {
+          google.accounts.oauth2.initTokenClient({
+            client_id: CONFIG.CLIENT_ID,
+            scope: 'https://www.googleapis.com/auth/calendar.readonly',
+            callback: (tokenResponse) => {
+              this.accessToken = tokenResponse.access_token
+              resolve(this.accessToken)
+            }
+          }).requestAccessToken()
+        }
       })
     },
     async loadEvents() {
@@ -74,12 +82,23 @@ createApp({
         '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
       ).join(''))
       return JSON.parse(jsonPayload)
+    },
+    logout() {
+      this.user = null
+      this.accessToken = null
+      google.accounts.id.disableAutoSelect()
+      document.getElementById('g_id_signin').innerHTML = ''
+      google.accounts.id.renderButton(
+        document.getElementById('g_id_signin'),
+        { theme: 'outline', size: 'large', text: 'sign_in_with' }
+      )
     }
   },
   mounted() {
     google.accounts.id.initialize({
       client_id: CONFIG.CLIENT_ID,
-      callback: this.handleCredentialResponse
+      callback: this.handleCredentialResponse,
+      auto_select: true
     })
     google.accounts.id.renderButton(
       document.getElementById("g_id_signin"),
