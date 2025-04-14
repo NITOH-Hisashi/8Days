@@ -11,45 +11,48 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div id="app">
-        <h1>Eight Days</h1>
-        <div>
-            <label>開始日を選択: </label>
-            <input type="date" v-model="startDate" @change="loadEvents" />
-        </div>
-
-        <div v-if="!user">
-            <p class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</p>
-            <div id="g_id_signin"></div>
-        </div>
-
-        <div v-else>
-            <p>ようこそ、{{ user.name }} さん</p>
-            <table class="calendar-table">
-                <thead>
-                    <tr>
-                        <th v-for="date in dateRange" :key="date">{{ formatDateLabel(date) }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td v-for="date in dateRange" :key="date">
-                            <ul>
-                                <li v-for="event in eventsByDate[date] || []" :key="event.id">
-                                    {{ event.time }} - {{ event.summary }}
-                                </li>
-                            </ul>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <p>
-            <a href="terms.html" target="_blank">利用規約</a> |
-            <a href="privacy.html" target="_blank">個人情報保護方針</a>
-        </p>
-        <p>Copyright AMUS IT Support</p>
+  <div id="app">
+    <h1>Eight Days</h1>
+    <div>
+      <label>開始日を選択: </label>
+      <input type="date" v-model="startDate" @change="loadEvents" />
     </div>
+
+    <div v-if="!user">
+      <div id="g_id_signin"></div>
+    </div>
+
+    <div v-else>
+      <p>ようこそ、{{ user.name }} さん</p>
+      <button @click="logout">ログアウト</button>
+
+      <div v-if="calendarList.length">
+        <h2>カレンダーの表示設定</h2>
+        <label v-for="cal in calendarList" :key="cal.id">
+          <input type="checkbox" v-model="selectedCalendars" :value="cal.id" />
+          {{ cal.summary }}
+        </label>
+      </div>
+
+      <table class="calendar-table">
+        <thead>
+          <tr>
+            <th v-for="date in dateRange" :key="date">{{ formatDateLabel(date) }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td v-for="date in dateRange" :key="date">
+              <ul>
+                <li v-for="event in eventsByDate[date] || []" :key="event.id">
+                  {{ event.time }} - {{ event.summary }}
+                </li>
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </body>
 </html>
