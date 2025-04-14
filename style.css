@@ -1,32 +1,16 @@
+
 body {
-  font-family: sans-serif;
-  max-width: 960px;
-  margin: 2em auto;
-  padding: 0 1em;
-}
-h1 {
-  color: #333;
+  font-family: Arial, sans-serif;
+  margin: 20px;
 }
 .calendar-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1em;
+  margin-top: 20px;
 }
 .calendar-table th,
 .calendar-table td {
   border: 1px solid #ccc;
+  padding: 10px;
   vertical-align: top;
-  padding: 0.5em;
-}
-.calendar-table th {
-  background-color: #f8f8f8;
-}
-.calendar-table ul {
-  list-style-type: none;
-  padding-left: 0;
-  margin: 0;
-}
-.calendar-table li {
-  margin-bottom: 0.4em;
-  font-size: 0.9em;
 }
