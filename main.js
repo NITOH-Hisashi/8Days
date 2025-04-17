@@ -81,7 +81,7 @@ createApp({
   },
   mounted() {
     google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
+      client_id: CONFIG.CLIENT_ID,
       callback: this.handleCredentialResponse
     });
     google.accounts.id.renderButton(
