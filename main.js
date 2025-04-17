@@ -77,6 +77,7 @@ createApp({
       google.accounts.id.disableAutoSelect();
       this.user = null;
       this.token = null;
+
     }
   },
   mounted() {
