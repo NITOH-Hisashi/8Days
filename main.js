@@ -24,6 +24,12 @@ createApp({
     }
   },
   methods: {
+    handleCredentialResponse(response) {
+        const data = jwt_decode(response.credential);
+        this.user = { name: data.name, email: data.email };
+        this.token = response.credential;
+        this.loadCalendarList().then(this.loadEvents);
+      },
     formatDateInput(date) {
       return date.toISOString().split("T")[0];
     },
@@ -71,12 +77,6 @@ createApp({
       google.accounts.id.disableAutoSelect();
       this.user = null;
       this.token = null;
-    },
-    handleCredentialResponse(response) {
-      const data = jwt_decode(response.credential);
-      this.user = { name: data.name, email: data.email };
-      this.token = response.credential;
-      this.loadCalendarList().then(this.loadEvents);
     }
   },
   mounted() {
