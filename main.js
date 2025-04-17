@@ -29,7 +29,16 @@ createApp({
         this.user = { name: data.name, email: data.email };
         this.token = response.credential;
         this.loadCalendarList().then(this.loadEvents);
-      },
+     },
+     getAccessToken() {
+        return new Promise((resolve) => {
+            google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/calendar.readonly',
+                callback: (tokenResponse) => resolve(tokenResponse.access_token)
+            }).requestAccessToken()
+        })
+    },
     formatDateInput(date) {
       return date.toISOString().split("T")[0];
     },
