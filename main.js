@@ -1,14 +1,14 @@
 const { createApp } = Vue;
 
-createApp({
+const app = createApp({
   data() {
     return {
+      startDate: new Date().toISOString().split("T")[0],
       user: null,
       token: null,
-      startDate: this.formatDateInput(new Date()),
+      calendars: [],
+      visibleCalendars: [],
       eventsByDate: {},
-      calendarList: [],
-      selectedCalendars: []
     };
   },
   computed: {
@@ -18,88 +18,92 @@ createApp({
       for (let i = 0; i < 8; i++) {
         const d = new Date(start);
         d.setDate(start.getDate() + i);
-        dates.push(this.formatDateKey(d));
+        dates.push(d.toISOString().split("T")[0]);
       }
       return dates;
-    }
+    },
   },
   methods: {
-    handleCredentialResponse(response) {
-        const data = jwt_decode(response.credential);
-        this.user = { name: data.name, email: data.email };
-        this.token = response.credential;
-        this.loadCalendarList().then(this.loadEvents);
-    },
-     /*
-     getAccessToken() {
-        return new Promise((resolve) => {
-            google.accounts.oauth2.initTokenClient({
-                client_id: CONFIG.CLIENT_ID,
-                scope: 'https://www.googleapis.com/auth/calendar.readonly',
-                callback: (tokenResponse) => resolve(tokenResponse.access_token)
-            }).requestAccessToken()
-        })
-    },
-    */
-    formatDateInput(date) {
-      return date.toISOString().split("T")[0];
-    },
-    formatDateKey(date) {
-      return date.toISOString().split("T")[0];
-    },
     formatDateLabel(dateStr) {
       const date = new Date(dateStr);
-      return `${date.getMonth() + 1}/${date.getDate()} (${["日","月","火","水","木","金","土"][date.getDay()]})`;
+      return `${date.getMonth() + 1}/${date.getDate()} (${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
+    },
+    logout() {
+      this.user = null;
+      this.token = null;
+      this.calendars = [];
+      this.visibleCalendars = [];
+      this.eventsByDate = {};
+      google.accounts.id.disableAutoSelect();
+      location.reload();
     },
     async loadCalendarList() {
       const res = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
-        headers: { Authorization: `Bearer ${this.token}` }
+        headers: { Authorization: `Bearer ${this.token}` },
       });
       const data = await res.json();
-      this.calendarList = data.items;
-      this.selectedCalendars = data.items.map(cal => cal.id);
+      this.calendars = data.items;
+      this.visibleCalendars = data.items.map((cal) => cal.id);
     },
     async loadEvents() {
-      if (!this.token || !this.startDate) return;
-      this.eventsByDate = {};
-      for (const calId of this.selectedCalendars) {
-        const timeMin = new Date(this.startDate).toISOString();
-        const endDate = new Date(this.startDate);
-        endDate.setDate(endDate.getDate() + 7);
-        const timeMax = endDate.toISOString();
+      if (!this.token || !this.visibleCalendars.length) return;
+      const eventsByDate = {};
+      const timeMin = new Date(this.startDate).toISOString();
+      const timeMax = new Date(new Date(this.startDate).getTime() + 7 * 86400000).toISOString();
 
-        const res = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
-          { headers: { Authorization: `Bearer ${this.token}` } }
-        );
+      for (const calendarId of this.visibleCalendars) {
+        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
+        url.searchParams.set("timeMin", timeMin);
+        url.searchParams.set("timeMax", timeMax);
+        url.searchParams.set("singleEvents", "true");
+        url.searchParams.set("orderBy", "startTime");
+
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${this.token}` },
+        });
         const data = await res.json();
-        for (const item of data.items || []) {
-          const dateKey = item.start.date || item.start.dateTime.split("T")[0];
-          if (!this.eventsByDate[dateKey]) this.eventsByDate[dateKey] = [];
-          this.eventsByDate[dateKey].push({
+        if (!data.items) continue;
+
+        for (const item of data.items) {
+          const start = item.start.dateTime || item.start.date;
+          const date = start.split("T")[0];
+          if (!eventsByDate[date]) eventsByDate[date] = [];
+          eventsByDate[date].push({
             id: item.id,
-            summary: item.summary,
-            time: item.start.dateTime ? item.start.dateTime.split("T")[1].substring(0,5) : "終日"
+            summary: item.summary || "(無題)",
+            time: item.start.dateTime ? new Date(item.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "終日",
           });
         }
       }
-    },
-    logout() {
-      google.accounts.id.disableAutoSelect();
-      this.user = null;
-      this.token = null;
 
-    }
+      this.eventsByDate = eventsByDate;
+    },
+    handleCredentialResponse(response) {
+      const decoded = jwt_decode(response.credential);
+      this.user = { name: decoded.name, email: decoded.email };
+
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: "https://www.googleapis.com/auth/calendar.readonly",
+        callback: (tokenResponse) => {
+          this.token = tokenResponse.access_token;
+          this.loadCalendarList().then(this.loadEvents);
+        },
+      });
+      tokenClient.requestAccessToken();
+    },
   },
   mounted() {
     google.accounts.id.initialize({
-      client_id: CONFIG.CLIENT_ID,
-      callback: this.handleCredentialResponse
+        client_id: CONFIG.CLIENT_ID,
+      callback: this.handleCredentialResponse,
     });
     google.accounts.id.renderButton(
       document.getElementById("g_id_signin"),
       { theme: "outline", size: "large" }
     );
     google.accounts.id.prompt();
-  }
-}).mount("#app");
+  },
+});
+
+app.mount("#app");
