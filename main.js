@@ -49,7 +49,7 @@ const app = createApp({
       if (!this.token || !this.visibleCalendars.length) return;
       const eventsByDate = {};
       const timeMin = new Date(this.startDate).toISOString();
-      const timeMax = new Date(new Date(this.startDate).getTime() + 8 * 24 * 60 * 60).toISOString();
+      const timeMax = new Date(new Date(this.startDate).getTime() + 8 * 24 * 60 * 60 * 1000).toISOString();
 
       for (const calendarId of this.visibleCalendars) {
         const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
