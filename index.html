@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eight Days Calendar</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="config.js"></script>
   <script src="main.js" defer></script>
@@ -24,11 +24,10 @@
             <p>ようこそ、{{ user.name }} さん</p>
             <button @click="logout">ログアウト</button>
 
-            <div v-if="calendarList.length">
-                <h2>カレンダーの表示設定</h2>
-                <label v-for="cal in calendarList" :key="cal.id">
-                    <input type="checkbox" v-model="selectedCalendars" :value="cal.id" />
-                    {{ cal.summary }}
+            <div class="calendar-filters">
+                <label v-for="calendar in calendars" :key="calendar.id">
+                    <input type="checkbox" v-model="visibleCalendars" :value="calendar.id" />
+                    {{ calendar.summary }}
                 </label>
             </div>
 

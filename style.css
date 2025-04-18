@@ -1,16 +1,18 @@
 
 body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
+    font-family: Arial, sans-serif;
+    margin: 1em;
 }
 .calendar-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 1em;
 }
-.calendar-table th,
-.calendar-table td {
+.calendar-table th, .calendar-table td {
   border: 1px solid #ccc;
-  padding: 10px;
   vertical-align: top;
+  padding: 0.5em;
+}
+.calendar-filters {
+  margin: 1em 0;
 }
