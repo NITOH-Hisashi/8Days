@@ -26,7 +26,7 @@
 
             <div class="calendar-filters">
                 <label v-for="calendar in calendars" :key="calendar.id">
-                    <input type="checkbox" v-model="visibleCalendars" :value="calendar.id" />
+                    <input type="checkbox" v-model="visibleCalendars" :value="calendar.id" @change="loadEvents"/>
                     {{ calendar.summary }}
                 </label>
             </div>
