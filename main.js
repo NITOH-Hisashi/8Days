@@ -29,7 +29,8 @@ createApp({
         this.user = { name: data.name, email: data.email };
         this.token = response.credential;
         this.loadCalendarList().then(this.loadEvents);
-     },
+    },
+     /*
      getAccessToken() {
         return new Promise((resolve) => {
             google.accounts.oauth2.initTokenClient({
@@ -39,6 +40,7 @@ createApp({
             }).requestAccessToken()
         })
     },
+    */
     formatDateInput(date) {
       return date.toISOString().split("T")[0];
     },
