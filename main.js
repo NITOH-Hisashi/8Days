@@ -83,7 +83,7 @@ const app = createApp({
       this.user = { name: decoded.name, email: decoded.email };
 
       const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
+        client_id: CONFIG.CLIENT_ID,
         scope: "https://www.googleapis.com/auth/calendar.readonly",
         callback: (tokenResponse) => {
           this.token = tokenResponse.access_token;
@@ -96,7 +96,7 @@ const app = createApp({
   mounted() {
     google.accounts.id.initialize({
         client_id: CONFIG.CLIENT_ID,
-      callback: this.handleCredentialResponse,
+        callback: this.handleCredentialResponse,
     });
     google.accounts.id.renderButton(
       document.getElementById("g_id_signin"),
