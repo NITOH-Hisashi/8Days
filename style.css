@@ -1,7 +1,8 @@
 body {
-  font-family: sans-serif;
-  padding: 1em;
-  background: #f9f9f9;
+    font-family: Arial,sans-serif;
+    margin: 1em;
+    padding: 1em;
+    background: #f9f9f9;
 }
 
 .calendar-container {
@@ -48,4 +49,13 @@ body {
   padding: 2px 4px;
   font-size: 12px;
   overflow: hidden;
+}
+
+.event:hover {
+  background: #c0dfff;
+  cursor: pointer;
+}
+
+.event .title {
+  font-weight: bold;
 }

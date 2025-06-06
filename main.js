@@ -78,7 +78,7 @@ createApp({
 
     onMounted(() => {
       google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
+          client_id: CONFIG.GOOGLE_CLIENT_ID,
         callback: async (response) => {
           const decoded = parseJwt(response.credential);
           user.value = decoded;
@@ -90,7 +90,7 @@ createApp({
         size: "large",
       });
       tokenClient.value = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
+          client_id: CONFIG.GOOGLE_CLIENT_ID,
         scope: "https://www.googleapis.com/auth/calendar.readonly",
         callback: (resp) => {
           accessToken.value = resp.access_token;
