@@ -1,50 +1,48 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eight Days Timeline</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="config.js"></script>
-  <script src="main.js" defer></script>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eight Days - あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</title>
+    <script src="https://unpkg.com/vue@3.4/dist/vue.global.prod.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="config.js"></script>
+    <script src="main.js" defer></script>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <h1>Eight Days</h1>
-    <div>
-      <label>開始日を選択: </label>
-      <input type="date" v-model="startDate" @change="loadEvents" />
-    </div>
-
-    <div v-if="!user">
-      <div id="g_id_signin"></div>
-    </div>
-
-    <div v-else>
-      <p>ようこそ、{{ user.name }} さん</p>
-      <button @click="logout">ログアウト</button>
-      <div class="calendar-container">
-        <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
-          <div class="date-header">{{ formatDateLabel(date) }}</div>
-          <div class="all-day-events">
-            <div v-for="event in events.filter(e => e.allDay)" class="event all-day">
-              {{ event.summary }}
-            </div>
-          </div>
-          <div class="time-grid">
-            <div
-              v-for="event in events.filter(e => !e.allDay)"
-              class="event"
-              :style="styleForEvent(event)"
-            >
-              {{ event.time }} - {{ event.summary }}
-            </div>
-          </div>
+    <div id="app">
+        <h1>Eight Days Calendar</h1>
+        <div v-if="!user">
+            <p class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</p>
+            <div id="g_id_signin"></div>
         </div>
-      </div>
+
+        <div v-else>
+            <p>ようこそ、{{ user.name }} さん</p>
+            <button @click="logout">ログアウト</button>
+            <div>
+                <label>開始日を選択: </label>
+                <input type="date" v-model="startDate" @change="loadEvents" />
+            </div>
+            <div class="calendar-container">
+                <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
+                    <div class="date-header">{{ formatDateLabel(date) }}</div>
+                    <div class="all-day-events">
+                        <div v-for="event in events.filter(e => e.allDay)" class="event all-day">
+                            {{ event.summary }}
+                        </div>
+                    </div>
+                    <div class="time-grid">
+                        <div v-for="event in events.filter(e => !e.allDay)"
+                             class="event"
+                             :style="styleForEvent(event)">
+                            {{ event.time }} - {{ event.summary }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </body>
 </html>
