@@ -21,10 +21,19 @@
         <div v-else>
             <p>ようこそ、{{ user.name }} さん</p>
             <button @click="logout">ログアウト</button>
+
+            <div class="calendar-filters">
+                <label v-for="calendar in calendars" :key="calendar.id">
+                    <input type="checkbox" v-model="visibleCalendars" :value="calendar.id" @change="loadEvents" />
+                    {{ calendar.summary }}
+                </label>
+            </div>
+
             <div>
                 <label>開始日を選択: </label>
                 <input type="date" v-model="startDate" @change="loadEvents" />
             </div>
+            
             <div class="calendar-container">
                 <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
                     <div class="date-header">{{ formatDateLabel(date) }}</div>
@@ -42,6 +51,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </body>
