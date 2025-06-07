@@ -33,7 +33,7 @@
                 <label>開始日を選択: </label>
                 <input type="date" v-model="startDate" @change="loadEvents" />
             </div>
-            
+
             <div class="calendar-container">
                 <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
                     <div class="date-header">{{ formatDateLabel(date) }}</div>
@@ -53,6 +53,14 @@
             </div>
 
         </div>
+
+        <footer>
+            <p>
+                <a href="terms.html" target="_blank">利用規約</a> |
+                <a href="privacy.html" target="_blank">個人情報保護方針</a>
+            </p>
+            <p>Copyright AMUS IT Support</p>
+        </footer>
     </div>
 </body>
 </html>
