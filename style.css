@@ -1,5 +1,5 @@
 body {
-    font-family: Arial,sans-serif;
+    font-family: Arial, sans-serif;
     margin: 1em;
     padding: 1em;
     background: #f9f9f9;
@@ -28,9 +28,13 @@ body {
 }
 
 .all-day-events {
-  background: #fffae6;
-  padding: 0.5em;
-  border-bottom: 1px solid #ddd;
+    background: #fffae6;
+    padding: 0.5em;
+    border-bottom: 1px solid #ddd;
+}
+
+.calendar-filters {
+    margin: 1em 0;
 }
 
 .time-grid {
