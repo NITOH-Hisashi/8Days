@@ -21,6 +21,28 @@ createApp({
             return dates;
         });
 
+        const sampleEvents = [
+            {
+                id: "sample-1",
+                summary: "サンプル会議",
+                start: { dateTime: "2025-06-07T10:00:00+09:00" },
+                end: { dateTime: "2025-06-07T11:00:00+09:00" },
+            },
+            {
+                id: "sample-2",
+                summary: "終日サンプルイベント",
+                start: { date: "2025-06-08" },
+                end: { date: "2025-06-09" },
+            },
+            {
+                id: "sample-3",
+                summary: "年跨ぎ",
+                start: { dateTime: "2025-12-31T23:00:00+09:00" },
+                end: { dateTime: "2026-01-01T01:00:00+09:00" },
+            },
+        ];
+
+
         function formatDateLabel(date) {
             const d = new Date(date);
             return d.toLocaleDateString("ja-JP", { weekday: "short", month: "short", day: "numeric" });
@@ -55,7 +77,11 @@ createApp({
         }
 
         async function loadEvents() {
-            if (!accessToken.value) return;
+            if (!accessToken.value) {
+                // 未ログイン → サンプルイベントを表示
+                eventsByDate.value = parseEvents(sampleEvents);
+                return;
+            }
             const timeMin = new Date(startDate.value);
             const timeMax = new Date(timeMin);
             timeMax.setDate(timeMax.getDate() + 8);
