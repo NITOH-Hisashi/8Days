@@ -1,4 +1,4 @@
-const { createApp, ref, onMounted, computed } = Vue;
+ï»¿const { createApp, ref, onMounted, computed } = Vue;
 
 createApp({
     setup() {
@@ -24,19 +24,19 @@ createApp({
         const sampleEvents = [
             {
                 id: "sample-1",
-                summary: "ƒTƒ“ƒvƒ‹‰ï‹c",
+                summary: "ã‚µãƒ³ãƒ—ãƒ«ä¼šè­°",
                 start: { dateTime: "2025-06-07T10:00:00+09:00" },
                 end: { dateTime: "2025-06-07T11:00:00+09:00" },
             },
             {
                 id: "sample-2",
-                summary: "I“úƒTƒ“ƒvƒ‹ƒCƒxƒ“ƒg",
+                summary: "çµ‚æ—¥ã‚µãƒ³ãƒ—ãƒ«ã‚¤ãƒ™ãƒ³ãƒˆ",
                 start: { date: "2025-06-08" },
                 end: { date: "2025-06-09" },
             },
             {
                 id: "sample-3",
-                summary: "”NŒ×‚¬",
+                summary: "å¹´è·¨ã",
                 start: { dateTime: "2025-12-31T23:00:00+09:00" },
                 end: { dateTime: "2026-01-01T01:00:00+09:00" },
             },
@@ -78,7 +78,7 @@ createApp({
 
         async function loadEvents() {
             if (!accessToken.value) {
-                // –¢ƒƒOƒCƒ“ ¨ ƒTƒ“ƒvƒ‹ƒCƒxƒ“ƒg‚ğ•\¦
+                // æœªãƒ­ã‚°ã‚¤ãƒ³ â†’ ã‚µãƒ³ãƒ—ãƒ«ã‚¤ãƒ™ãƒ³ãƒˆã‚’è¡¨ç¤º
                 eventsByDate.value = parseEvents(sampleEvents);
                 return;
             }
