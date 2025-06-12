@@ -28,30 +28,29 @@
                     {{ calendar.summary }}
                 </label>
             </div>
+        </div>
 
-            <div>
-                <label>開始日を選択: </label>
-                <input type="date" v-model="startDate" @change="loadEvents" />
-            </div>
+        <div>
+            <label>開始日を選択: </label>
+            <input type="date" v-model="startDate" @change="loadEvents" />
+        </div>
 
-            <div class="calendar-container">
-                <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
-                    <div class="date-header">{{ formatDateLabel(date) }}</div>
-                    <div class="all-day-events">
-                        <div v-for="event in events.filter(e => e.allDay)" class="event all-day">
-                            {{ event.summary }}
-                        </div>
+        <div class="calendar-container">
+            <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
+                <div class="date-header">{{ formatDateLabel(date) }}</div>
+                <div class="all-day-events">
+                    <div v-for="event in events.filter(e => e.allDay)" class="event all-day">
+                        {{ event.summary }}
                     </div>
-                    <div class="time-grid">
-                        <div v-for="event in events.filter(e => !e.allDay)"
-                             class="event"
-                             :style="styleForEvent(event)">
-                            {{ event.time }} - {{ event.summary }}
-                        </div>
+                </div>
+                <div class="time-grid">
+                    <div v-for="event in events.filter(e => !e.allDay)"
+                         class="event"
+                         :style="styleForEvent(event)">
+                        {{ event.time }} - {{ event.summary }}
                     </div>
                 </div>
             </div>
-
         </div>
 
         <footer>
