@@ -1,109 +1,152 @@
-const { createApp } = Vue;
+﻿const { createApp, ref, onMounted, computed } = Vue;
 
-const app = createApp({
-  data() {
-    return {
-      startDate: new Date().toISOString().split("T")[0],
-      user: null,
-      token: null,
-      calendars: [],
-      visibleCalendars: [],
-      eventsByDate: {},
-    };
-  },
-  computed: {
-    dateRange() {
-      const dates = [];
-      const start = new Date(this.startDate);
-      for (let i = 0; i < 8; i++) {
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-        dates.push(d.toISOString().split("T")[0]);
-      }
-      return dates;
-    },
-  },
-  methods: {
-    formatDateLabel(dateStr) {
-      const date = new Date(dateStr);
-      return `${date.getMonth() + 1}/${date.getDate()} (${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
-    },
-    logout() {
-      this.user = null;
-      this.token = null;
-      this.calendars = [];
-      this.visibleCalendars = [];
-      this.eventsByDate = {};
-      google.accounts.id.disableAutoSelect();
-      location.reload();
-    },
-    async loadCalendarList() {
-      const res = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
-        headers: { Authorization: `Bearer ${this.token}` },
-      });
-      const data = await res.json();
-      this.calendars = data.items;
-      this.visibleCalendars = data.items.map((cal) => cal.id);
-    },
-    async loadEvents() {
-      if (!this.token || !this.visibleCalendars.length) return;
-      const eventsByDate = {};
-      const timeMin = new Date(this.startDate).toISOString();
-      const timeMax = new Date(new Date(this.startDate).getTime() + 8 * 24 * 60 * 60 * 1000).toISOString();
+createApp({
+    setup() {
+        const user = ref(null);
+        const tokenClient = ref(null);
+        const accessToken = ref(null);
+        const startDate = ref(new Date().toISOString().split("T")[0]);
+        const calendars = [];
+        const visibleCalendars = [];
+        const eventsByDate = ref({});
 
-      for (const calendarId of this.visibleCalendars) {
-        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
-        url.searchParams.set("timeMin", timeMin);
-        url.searchParams.set("timeMax", timeMax);
-        url.searchParams.set("singleEvents", "true");
-        url.searchParams.set("orderBy", "startTime");
-
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${this.token}` },
+        const dateRange = computed(() => {
+            const dates = [];
+            const start = new Date(startDate.value);
+            for (let i = 0; i < 8; i++) {
+                const d = new Date(start);
+                d.setDate(d.getDate() + i);
+                dates.push(d.toISOString().split("T")[0]);
+            }
+            return dates;
         });
-        const data = await res.json();
-        if (!data.items) continue;
 
-        for (const item of data.items) {
-          const start = item.start.dateTime || item.start.date;
-          const date = start.split("T")[0];
-          if (!eventsByDate[date]) eventsByDate[date] = [];
-          eventsByDate[date].push({
-            id: item.id,
-            summary: item.summary || "(無題)",
-            time: item.start.dateTime ? new Date(item.start.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "終日",
-          });
+        const sampleEvents = [
+            {
+                id: "sample-1",
+                summary: "サンプル会議",
+                start: { dateTime: "2025-06-07T10:00:00+09:00" },
+                end: { dateTime: "2025-06-07T11:00:00+09:00" },
+            },
+            {
+                id: "sample-2",
+                summary: "終日サンプルイベント",
+                start: { date: "2025-06-08" },
+                end: { date: "2025-06-09" },
+            },
+            {
+                id: "sample-3",
+                summary: "年跨ぎ",
+                start: { dateTime: "2025-12-31T23:00:00+09:00" },
+                end: { dateTime: "2026-01-01T01:00:00+09:00" },
+            },
+        ];
+
+
+        function formatDateLabel(date) {
+            const d = new Date(date);
+            return d.toLocaleDateString("ja-JP", { weekday: "short", month: "short", day: "numeric" });
         }
-      }
 
-      this.eventsByDate = eventsByDate;
-    },
-    handleCredentialResponse(response) {
-      const decoded = jwt_decode(response.credential);
-      this.user = { name: decoded.name, email: decoded.email };
+        function styleForEvent(event) {
+            const startHour = parseInt(event.startTime.split(":")[0]);
+            const endHour = parseInt(event.endTime.split(":")[0]);
+            return {
+                top: `${(startHour - 6) * 40}px`,
+                height: `${(endHour - startHour) * 40}px`
+            };
+        }
 
-      const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CONFIG.CLIENT_ID,
-        scope: "https://www.googleapis.com/auth/calendar.readonly",
-        callback: (tokenResponse) => {
-          this.token = tokenResponse.access_token;
-          this.loadCalendarList().then(this.loadEvents);
-        },
-      });
-      tokenClient.requestAccessToken();
-    },
-  },
-  mounted() {
-    google.accounts.id.initialize({
-        client_id: CONFIG.CLIENT_ID,
-        callback: this.handleCredentialResponse,
-    });
-    google.accounts.id.renderButton(
-      document.getElementById("g_id_signin"),
-      { theme: "outline", size: "large" }
-    );
-    google.accounts.id.prompt();
-  },
-});
+        function logout() {
+            user.value = null;
+            accessToken.value = null;
+            calendars.value = [];
+            visibleCalendars.value = [];
+            eventsByDate.value = {};
+            google.accounts.id.disableAutoSelect();
+            google.accounts.id.revoke(user.value.email, () => { });
+        }
 
-app.mount("#app");
+        async function loadCalendarList() {
+            const res = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
+                headers: { Authorization: `Bearer ${this.token}` },
+            });
+            const data = await res.json();
+            calendars.value = data.items;
+            visibleCalendars.value = data.items.map((cal) => cal.id);
+        }
+
+        async function loadEvents() {
+            if (!accessToken.value) {
+                // 未ログイン → サンプルイベントを表示
+                eventsByDate.value = parseEvents(sampleEvents);
+                return;
+            }
+            const timeMin = new Date(startDate.value);
+            const timeMax = new Date(timeMin);
+            timeMax.setDate(timeMax.getDate() + 8);
+            const calendarId = "primary";
+
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&singleEvents=true&orderBy=startTime`;
+
+            const res = await fetch(url, {
+                headers: { Authorization: `Bearer ${accessToken.value}` },
+            });
+            const data = await res.json();
+
+            const grouped = {};
+            for (const date of dateRange.value) grouped[date] = [];
+
+            for (const item of data.items || []) {
+                const isAllDay = !!item.start.date;
+                const dateKey = isAllDay ? item.start.date : item.start.dateTime.split("T")[0];
+                const start = isAllDay ? "00:00" : item.start.dateTime.split("T")[1].slice(0, 5);
+                const end = isAllDay ? "23:59" : item.end.dateTime.split("T")[1].slice(0, 5);
+                if (!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push({
+                    id: item.id,
+                    summary: item.summary,
+                    allDay: isAllDay,
+                    time: start,
+                    startTime: start,
+                    endTime: end,
+                });
+            }
+            eventsByDate.value = grouped;
+        }
+
+        onMounted(() => {
+            google.accounts.id.initialize({
+                client_id: CONFIG.GOOGLE_CLIENT_ID,
+                callback: async (response) => {
+                    const decoded = parseJwt(response.credential);
+                    user.value = decoded;
+                    const tokenRes = await tokenClient.value.requestAccessToken({ prompt: '' });
+                },
+            });
+            google.accounts.id.renderButton(document.getElementById("g_id_signin"), {
+                theme: "outline",
+                size: "large",
+            });
+            tokenClient.value = google.accounts.oauth2.initTokenClient({
+                client_id: CONFIG.GOOGLE_CLIENT_ID,
+                scope: "https://www.googleapis.com/auth/calendar.readonly",
+                callback: (resp) => {
+                    accessToken.value = resp.access_token;
+                    loadCalendarList().then(loadEvents());
+                },
+            });
+        });
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        return { user, startDate, eventsByDate, formatDateLabel, logout, styleForEvent };
+    }
+}).mount("#app");

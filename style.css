@@ -1,18 +1,65 @@
-
 body {
     font-family: Arial, sans-serif;
     margin: 1em;
+    padding: 1em;
+    background: #f9f9f9;
 }
-.calendar-table {
-  width: 100%;
-  border-collapse: collapse;
+
+.calendar-container {
+  display: flex;
+  gap: 1em;
   margin-top: 1em;
+  overflow-x: auto;
 }
-.calendar-table th, .calendar-table td {
+
+.date-column {
+  background: #fff;
   border: 1px solid #ccc;
-  vertical-align: top;
+  border-radius: 8px;
   padding: 0.5em;
+  min-width: 150px;
+  position: relative;
 }
+
+.date-header {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.5em;
+}
+
+.all-day-events {
+    background: #fffae6;
+    padding: 0.5em;
+    border-bottom: 1px solid #ddd;
+}
+
 .calendar-filters {
-  margin: 1em 0;
+    margin: 1em 0;
+}
+
+.time-grid {
+  position: relative;
+  height: 640px;
+  background: repeating-linear-gradient(to bottom, #f0f0f0, #f0f0f0 39px, #fff 40px);
+}
+
+.event {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  background: #d0eaff;
+  border: 1px solid #80bfff;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.event:hover {
+  background: #c0dfff;
+  cursor: pointer;
+}
+
+.event .title {
+  font-weight: bold;
 }
