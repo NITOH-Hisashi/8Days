@@ -19,8 +19,10 @@
         </div>
 
         <div v-else>
-            <p>ようこそ、{{ user.name }} さん</p>
-            <button @click="logout">ログアウト</button>
+            <p>
+                ようこそ、{{ user.name }} さん
+                <button @click="logout">ログアウト</button>
+            </p>
 
             <div class="calendar-filters">
                 <label v-for="calendar in calendars" :key="calendar.id">
