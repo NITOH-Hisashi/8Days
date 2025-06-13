@@ -40,6 +40,13 @@
         <div class="calendar-container">
             <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
                 <div class="date-header">{{ formatDateLabel(date) }}</div>
+                <div class="day-events">
+                    <ul>
+                        <li v-for="event in eventsByDate[date] || []" :key="event.id">
+                            {{ event.time }} - {{ event.summary }}
+                        </li>
+                    </ul>
+                </div>
                 <div class="all-day-events">
                     <div v-for="event in events.filter(e => e.allDay)" class="event all-day">
                         {{ event.summary }}
@@ -53,7 +60,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
 
         <footer>
             <p>
