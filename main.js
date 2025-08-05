@@ -89,6 +89,7 @@ createApp({
             const timeMin = new Date(startDate.value);
             const timeMax = new Date(timeMin);
             timeMax.setDate(timeMax.getDate() + 8);
+            console.log({ visibleCalendars: visibleCalendars.value });
             for (const calendarId of visibleCalendars.value) {
                 if (!calendarId) continue;
                 const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&singleEvents=true&orderBy=startTime`;
