@@ -72,13 +72,11 @@ createApp({
                 headers: { Authorization: `Bearer ${this.token}` },
             });
             const data = await res.json();
-            return data;
+            calendars.value = data.items;
+            visibleCalendars.value = data.items.map((cal) => cal.id);
         }
 
         async function loadEvents() {
-            console.log({ data });
-            calendars.value = data.items;
-            visibleCalendars.value = data.items.map((cal) => cal.id);
             if (!accessToken.value) {
                 // 未ログイン → サンプルイベントを表示
                 eventsByDate.value = parseEvents(sampleEvents);
@@ -115,6 +113,7 @@ createApp({
                 });
             }
             eventsByDate.value = grouped;
+            console.log({ calendars });
         }
 
         onMounted(() => {
