@@ -72,6 +72,7 @@ createApp({
                 headers: { Authorization: `Bearer ${this.token}` },
             });
             const data = await res.json();
+            console.log(data);
             calendars.value = data.items;
             visibleCalendars.value = data.items.map((cal) => cal.id);
         }
