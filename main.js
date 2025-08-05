@@ -69,7 +69,7 @@ createApp({
 
         async function loadCalendarList() {
             const res = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
-                headers: { Authorization: `Bearer ${this.token}` },
+                headers: { Authorization: `Bearer ${accessToken.value}` },
             });
             const data = await res.json();
             calendars.value = data.items;
