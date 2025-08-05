@@ -58,13 +58,13 @@ createApp({
         }
 
         function logout() {
+            google.accounts.id.disableAutoSelect();
+            google.accounts.id.revoke(user.value.email, () => { });
             user.value = null;
             accessToken.value = null;
             calendars.value = [];
             visibleCalendars.value = [];
             eventsByDate.value = {};
-            google.accounts.id.disableAutoSelect();
-            google.accounts.id.revoke(user.value.email, () => { });
         }
 
         async function loadCalendarList() {
