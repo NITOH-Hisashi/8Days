@@ -4,15 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Eight Days - あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</title>
-    <script src="https://unpkg.com/vue@3.4/dist/vue.global.prod.js"></script>
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
     <!-- Google API Client Library を追加 -->
-    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
 
     <!-- Google Identity Services（ログイン用） -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="config.js"></script>
+
+    <script src="https://unpkg.com/vue@3.4/dist/vue.global.prod.js"></script>
+    <script src="config.js" defer></script>
     <script src="main.js" defer></script>
-    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <div id="app">
