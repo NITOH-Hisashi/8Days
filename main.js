@@ -68,6 +68,10 @@ createApp({
         }
 
         async function loadCalendarList() {
+            if (!accessToken.value) {
+                // 未ログイン → 
+                return;
+            }
             const res = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
                 headers: { Authorization: `Bearer ${accessToken.value}` },
             });
@@ -85,38 +89,50 @@ createApp({
             const timeMin = new Date(startDate.value);
             const timeMax = new Date(timeMin);
             timeMax.setDate(timeMax.getDate() + 8);
-            const calendarId = "primary";
-
-            const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&singleEvents=true&orderBy=startTime`;
-
-            const res = await fetch(url, {
-                headers: { Authorization: `Bearer ${accessToken.value}` },
-            });
-            const data = await res.json();
-
-            const grouped = {};
-            for (const date of dateRange.value) grouped[date] = [];
-
-            for (const item of data.items || []) {
-                const isAllDay = !!item.start.date;
-                const dateKey = isAllDay ? item.start.date : item.start.dateTime.split("T")[0];
-                const start = isAllDay ? "00:00" : item.start.dateTime.split("T")[1].slice(0, 5);
-                const end = isAllDay ? "23:59" : item.end.dateTime.split("T")[1].slice(0, 5);
-                if (!grouped[dateKey]) grouped[dateKey] = [];
-                grouped[dateKey].push({
-                    id: item.id,
-                    summary: item.summary,
-                    allDay: isAllDay,
-                    time: start,
-                    startTime: start,
-                    endTime: end,
+            for (const calendarId of this.visibleCalendars) {
+                if (!calendarId) continue;
+                const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&singleEvents=true&orderBy=startTime`;
+                const res = await fetch(url, {
+                    headers: { Authorization: `Bearer ${accessToken.value}` },
                 });
+                const data = await res.json();
+                if (!data.items) continue;
+
+                const grouped = {};
+                for (const date of dateRange.value) grouped[date] = [];
+
+                for (const item of data.items || []) {
+                    const isAllDay = !!item.start.date;
+                    const dateKey = isAllDay ? item.start.date : item.start.dateTime.split("T")[0];
+                    const start = isAllDay ? "00:00" : item.start.dateTime.split("T")[1].slice(0, 5);
+                    const end = isAllDay ? "23:59" : item.end.dateTime.split("T")[1].slice(0, 5);
+                    if (!grouped[dateKey]) grouped[dateKey] = [];
+                    grouped[dateKey].push({
+                        id: item.id,
+                        summary: item.summary,
+                        allDay: isAllDay,
+                        time: start,
+                        startTime: start,
+                        endTime: end,
+                    });
+                }
+                eventsByDate.value.push(grouped);
             }
-            eventsByDate.value = grouped;
             console.log({ calendars });
+            console.log({ eventsByDate });
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
         }
 
         onMounted(() => {
+            // Google Sign-Inの初期化
             google.accounts.id.initialize({
                 client_id: CONFIG.GOOGLE_CLIENT_ID,
                 callback: async (response) => {
@@ -139,15 +155,13 @@ createApp({
             });
         });
 
-        function parseJwt(token) {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
-        }
-
-        return { user, startDate, eventsByDate, formatDateLabel, logout, styleForEvent };
+        return {
+            user,
+            startDate,
+            eventsByDate,
+            formatDateLabel,
+            logout,
+            styleForEvent,
+        };
     }
 }).mount("#app");
