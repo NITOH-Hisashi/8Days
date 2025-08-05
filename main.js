@@ -76,8 +76,11 @@ createApp({
                 headers: { Authorization: `Bearer ${accessToken.value}` },
             });
             const data = await res.json();
-            calendars.value = data.items;
-            visibleCalendars.value = data.items.map((cal) => cal.id);
+            calendars.value = data.items || [];
+            // カレンダーIDの配列を設定
+            visibleCalendars.value = calendars.value.map((cal) => cal.id);
+            console.log('Loaded calendars:', calendars.value);
+            console.log('Visible calendar IDs:', visibleCalendars.value);
         }
 
         async function loadEvents() {
@@ -90,25 +93,38 @@ createApp({
             const timeMax = new Date(timeMin);
             timeMax.setDate(timeMax.getDate() + 8);
             console.log({ visibleCalendars: visibleCalendars.value });
+
+            // eventsByDateを初期化
+            eventsByDate.value = {};
+            for (const date of dateRange.value) {
+                eventsByDate.value[date] = [];
+            }
+
             for (const calendarId of visibleCalendars.value) {
                 if (!calendarId) continue;
-                const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&singleEvents=true&orderBy=startTime`;
+                const id = encodeURIComponent(calendarId);
+                console.log(`Fetching events for calendar: ${id}`);
+                // Google Calendar APIからイベントを取得
+                const url = `https://www.googleapis.com/calendar/v3/calendars/${id}/events?` +
+                    `timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&singleEvents=true&orderBy=startTime`;
                 const res = await fetch(url, {
                     headers: { Authorization: `Bearer ${accessToken.value}` },
                 });
                 const data = await res.json();
                 if (!data.items) continue;
 
-                const grouped = {};
-                for (const date of dateRange.value) grouped[date] = [];
-
-                for (const item of data.items || []) {
+                // 各日付のイベントを追加
+                for (const item of data.items) {
                     const isAllDay = !!item.start.date;
                     const dateKey = isAllDay ? item.start.date : item.start.dateTime.split("T")[0];
                     const start = isAllDay ? "00:00" : item.start.dateTime.split("T")[1].slice(0, 5);
                     const end = isAllDay ? "23:59" : item.end.dateTime.split("T")[1].slice(0, 5);
-                    if (!grouped[dateKey]) grouped[dateKey] = [];
-                    grouped[dateKey].push({
+
+                    if (!eventsByDate.value[dateKey]) {
+                        eventsByDate.value[dateKey] = [];
+                    }
+
+                    eventsByDate.value[dateKey].push({
                         id: item.id,
                         summary: item.summary,
                         allDay: isAllDay,
@@ -117,7 +133,6 @@ createApp({
                         endTime: end,
                     });
                 }
-                eventsByDate.value.push(grouped);
             }
             console.log({ calendars });
             console.log({ eventsByDate });
