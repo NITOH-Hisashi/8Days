@@ -6,8 +6,8 @@ createApp({
         const tokenClient = ref(null);
         const accessToken = ref(null);
         const startDate = ref(new Date().toISOString().split("T")[0]);
-        const calendars = [];
-        const visibleCalendars = [];
+        const calendars = ref([]);
+        const visibleCalendars = ref([]);
         const eventsByDate = ref({});
 
         const dateRange = computed(() => {
