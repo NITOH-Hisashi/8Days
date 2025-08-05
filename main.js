@@ -178,6 +178,8 @@ createApp({
             formatDateLabel,
             logout,
             styleForEvent,
+            calendars,
+            visibleCalendars,
         };
     }
 }).mount("#app");
