@@ -180,6 +180,7 @@ createApp({
             styleForEvent,
             calendars,
             visibleCalendars,
+            loadEvents,
         };
     }
 }).mount("#app");
