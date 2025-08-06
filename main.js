@@ -164,9 +164,10 @@ createApp({
             tokenClient.value = google.accounts.oauth2.initTokenClient({
                 client_id: CONFIG.GOOGLE_CLIENT_ID,
                 scope: "https://www.googleapis.com/auth/calendar.readonly",
-                callback: (resp) => {
+                callback: async (resp) => {
                     accessToken.value = resp.access_token;
-                    loadCalendarList().then(loadEvents());
+                    await loadCalendarList();
+                    await loadEvents();
                 },
             });
         });
