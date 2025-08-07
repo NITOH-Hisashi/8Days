@@ -42,12 +42,43 @@ createApp({
             },
         ];
 
+        /**
+         * イベントを日付ごとにパースして、オブジェクトに変換します。
+         * @param {Array} events - Google Calendar APIから取得したイベントの配列
+         * @returns {Object} 日付をキーとするイベントのオブジェクト
+         */
+        function parseEvents(events) {
+            const parsed = {};
+            for (const event of events) {
+                const date = event.start.date || event.start.dateTime.split('T')[0];
+                if (!parsed[date]) parsed[date] = [];
+                parsed[date].push({
+                    id: event.id,
+                    summary: event.summary,
+                    allDay: !!event.start.date,
+                    time: event.start.dateTime ? event.start.dateTime.split('T')[1].slice(0, 5) : "00:00",
+                    startTime: event.start.dateTime ? event.start.dateTime.split('T')[1].slice(0, 5) : "00:00",
+                    endTime: event.end.dateTime ? event.end.dateTime.split('T')[1].slice(0, 5) : "23:59"
+                });
+            }
+            return parsed;
+        }
 
+        /** 
+         * 日付をフォーマットして、ラベルとして使用します。
+         * @param {string|Date} date - 日付文字列またはDateオブジェクト
+         * @returns {string} フォーマットされた日付ラベル
+         */
         function formatDateLabel(date) {
             const d = new Date(date);
             return d.toLocaleDateString("ja-JP", { weekday: "short", month: "short", day: "numeric" });
         }
 
+        /**
+         * イベントのスタイルを計算します。
+         * @param {Object} event - イベントオブジェクト
+         * @returns {Object} スタイルオブジェクト
+         */
         function styleForEvent(event) {
             const startHour = parseInt(event.startTime.split(":")[0]);
             const endHour = parseInt(event.endTime.split(":")[0]);
@@ -57,6 +88,10 @@ createApp({
             };
         }
 
+        /**
+         * ログアウト処理を行います。
+         * Googleアカウントの自動選択を無効化し、トークンを取り消します。
+         */
         function logout() {
             google.accounts.id.disableAutoSelect();
             google.accounts.id.revoke(user.value.email, () => { });
@@ -67,6 +102,10 @@ createApp({
             eventsByDate.value = {};
         }
 
+        /**
+         * カレンダーリストをロードします。
+         * アクセストークンがない場合は何もしません。
+         */
         async function loadCalendarList() {
             if (!accessToken.value) {
                 // 未ログイン → 
@@ -83,6 +122,11 @@ createApp({
             console.log('Visible calendar IDs:', visibleCalendars.value);
         }
 
+        /**
+         * イベントをロードします。
+         * アクセストークンがない場合はサンプルイベントを表示します。
+         * それ以外の場合は、Google Calendar APIからイベントを取得し、日付ごとに整理します。
+         */
         async function loadEvents() {
             if (!accessToken.value) {
                 // 未ログイン → サンプルイベントを表示
@@ -138,6 +182,11 @@ createApp({
             console.log({ eventsByDate });
         }
 
+        /**
+         * JWTトークンをパースして、ペイロードを取得します。
+         * @param {string} token - JWTトークン
+         * @returns {Object} パースされたペイロード
+         */
         function parseJwt(token) {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -147,6 +196,10 @@ createApp({
             return JSON.parse(jsonPayload);
         }
 
+        /**
+         * コンポーネントのマウント時にGoogle Sign-Inを初期化します。
+         * GoogleアカウントのIDを取得し、トークンをリクエストします。
+         */
         onMounted(() => {
             // Google Sign-Inの初期化
             google.accounts.id.initialize({
