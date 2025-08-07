@@ -1,4 +1,4 @@
-﻿const { createApp, ref, onMounted, computed } = Vue;
+﻿const { createApp, ref, onMounted, computed, watch } = Vue;
 
 const LOG_CONFIG = {
     ENABLED: window.process.env.NODE_ENV !== 'production',
