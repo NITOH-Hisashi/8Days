@@ -465,16 +465,45 @@ createApp({
         };
 
         /**
+         * Base64 URLエンコードされた文字列をデコードします。
+         * @param {string} str - Base64 URLエンコードされた文字列
+         * @returns {string} デコードされた文字列
+         * @description
+         * この関数は、Base64 URLエンコードされた文字列をデコードします。
+         * URLエンコードされた文字列は、通常のBase64エンコードとは異なり、
+         * `-`と`_`を使用しているため、これらを標準のBase64文字に置き換えます。
+         * また、Base64エンコードではパディングが必要な場合があるため、
+         * パディング文字`=`を追加してからデコードします。
+         * この関数は、JWTトークンのペイロードをデコードするために使用されます。
+         * @example
+         * // Base64 URLエンコードされた文字列をデコードする例
+         * const decoded = base64UrlDecode("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
+         * console.log(decoded); // 出力: {"alg":"HS256","typ":"JWT"}
+         */
+        function base64UrlDecode(str) {
+            // Replace non-url compatible chars with base64 standard chars
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            // Add padding if it's missing
+            while (str.length % 4 !== 0) {
+                str += '=';
+            }
+            return atob(str);
+        }
+
+        /**
          * JWTトークンをパースして、ペイロードを取得します。
          * @param {string} token - JWTトークン
          * @returns {Object} パースされたペイロード
          */
         function parseJwt(token) {
+            // Get the payload part
             const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+            // Use the new decode function
+            const base64 = base64UrlDecode(base64Url);
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
+
             return JSON.parse(jsonPayload);
         }
 
@@ -489,6 +518,7 @@ createApp({
             try {
                 const decoded = parseJwt(token);
                 const now = Date.now() / 1000;
+                // Assuming decoded has 'exp' and 'iat' properties
                 return decoded.exp > now && decoded.iat < now;
             } catch (e) {
                 console.error('トークンの検証に失敗しました:', e);
