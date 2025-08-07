@@ -481,12 +481,14 @@ createApp({
          * console.log(decoded); // 出力: {"alg":"HS256","typ":"JWT"}
          */
         function base64UrlDecode(str) {
+            /*
             // Replace non-url compatible chars with base64 standard chars
             str = str.replace(/-/g, '+').replace(/_/g, '/');
             // Add padding if it's missing
             while (str.length % 4 !== 0) {
                 str += '=';
             }
+            */
             return atob(str);
         }
 
