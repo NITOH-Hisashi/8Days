@@ -286,6 +286,9 @@ createApp({
             });
         });
 
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+        const tomorrow = (new Date(now.getDate() + 1)).toISOString().split('T')[0];
         /**
         * サンプルイベントデータを定義します。
         * これらのイベントは、Google Calendar APIからのデータが取得できない場合や、
@@ -331,14 +334,14 @@ createApp({
             {
                 id: "sample-1",
                 summary: "サンプル会議",
-                start: { dateTime: "2025-06-07T10:00:00+09:00" },
-                end: { dateTime: "2025-06-07T11:00:00+09:00" },
+                start: { dateTime: `${today}T15:00:00+09:00` },
+                end: { dateTime: `${today}T17:00:00+09:00` },
             },
             {
                 id: "sample-2",
                 summary: "終日サンプルイベント",
-                start: { date: "2025-06-08" },
-                end: { date: "2025-06-09" },
+                start: { date: tomorrow },
+                end: { date: tomorrow },
             },
             {
                 id: "sample-3",
@@ -346,6 +349,12 @@ createApp({
                 start: { dateTime: "2025-12-31T23:00:00+09:00" },
                 end: { dateTime: "2026-01-01T01:00:00+09:00" },
             },
+            {
+                id: "sample-4",
+                summary: "複数日の終日イベント",
+                start: { date: today },
+                end: { date: tomorrow },
+            }
         ];
 
         /**
@@ -354,16 +363,32 @@ createApp({
          * @returns {Object} 日付をキーとするイベントのオブジェクト
          */
         function parseEvent(events) {
-            const parsed = {};
-            for (const event of events) {
-                // 年跨ぎイベントの処理
-                const startDate = event.start.date || event.start.dateTime.split('T')[0];
-                const endDate = event.end.date || event.end.dateTime.split('T')[0];
+            if (!events || !Array.isArray(events)) {
+                console.warn('Invalid events data:', events);
+                return {};
+            }
 
-                // 開始日から終了日までの各日にイベントを追加
-                let currentDate = new Date(startDate);
+            const parsed = {};
+            // イベントの日付を現在の日付に基づいて調整
+            events.forEach(event => {
+                // 年跨ぎイベントの処理
+                let startDate = event.start.date || event.start.dateTime.split('T')[0];
+                let endDate = event.end.date || event.end.dateTime.split('T')[0];
+
+                if (!startDate || !endDate) {
+                    console.warn('Invalid event dates:', event);
+                    return;
+                }
                 const endDateObj = new Date(endDate);
 
+                // 終日イベントの場合、終了日を1日前に調整（Google Calendarの仕様）
+                if (event.start.date) {
+                    endDateObj.setDate(endDateObj.getDate() - 1);
+                    endDate = endDateObj.toISOString().split('T')[0];
+                }
+
+                let currentDate = new Date(startDate);
+                // 日付範囲内の各日にイベントを追加
                 while (currentDate <= endDateObj) {
                     const dateKey = currentDate.toISOString().split('T')[0];
                     if (!parsed[dateKey]) parsed[dateKey] = [];
@@ -380,7 +405,9 @@ createApp({
 
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
-            }
+            });
+
+            console.log('Parsed events:', parsed);
             return parsed;
         }
 
@@ -488,7 +515,7 @@ createApp({
             const startHour = parseInt(event.startTime.split(":")[0]);
             const endHour = parseInt(event.endTime.split(":")[0]);
             return {
-                top: `${(startHour - 6) * 40}px`,
+                top: `${(startHour - 0) * 40}px`,
                 height: `${(endHour - startHour) * 40}px`
             };
         }
@@ -584,12 +611,12 @@ createApp({
          * それ以外の場合は、Google Calendar APIからイベントを取得し、日付ごとに整理します。
          */
         async function loadEvents() {
+            console.log({ calendars });
             if (!accessToken.value) {
                 // 未ログイン → サンプルイベントを表示
-                console.log('アクセストークンがないため、サンプルイベントを表示します');
+                console.log('サンプルイベントを処理します:', sampleEvents);
                 eventsByDate.value = parseEvent(sampleEvents);
-                console.log({ calendars });
-                console.log({ eventsByDate });
+                console.log('処理済みイベント:', eventsByDate.value);
                 return;
             }
 
@@ -648,7 +675,6 @@ createApp({
                         url.searchParams.set('timeMax', timeMax.toISOString());
                         url.searchParams.set('singleEvents', 'true');
                         url.searchParams.set('orderBy', 'startTime');
-
                         const responseEvents = await fetch(url, {
                             headers: { Authorization: `Bearer ${accessToken.value}` }
                         });
@@ -710,6 +736,7 @@ createApp({
         // 定期的なキャッシュクリア
         const CACHE_CLEANUP_INTERVAL = 1000 * 60 * 60; // 1時間
 
+        // キャッシュクリーンアップのインターバル
         /**
          * コンポーネントのアンマウント時に定期的なキャッシュクリアを停止します。
          * これにより、定期的なキャッシュクリアが停止され、
@@ -746,8 +773,9 @@ createApp({
         // クリーンアップ関数の配列を定義
         const cleanupFunctions = [];
 
-        // 一括クリーンアップ
+        // コンポーネントのアンマウント時にすべてのクリーンアップを実行
         onUnmounted(() => {
+            // 一括クリーンアップ
             cleanupFunctions.forEach(cleanup => {
                 try {
                     cleanup();
@@ -784,7 +812,7 @@ createApp({
                         // ロード中の状態を設定
                         loading.value = true;
                         await loadCalendarList();
-                        await loadEvents();
+                        //await loadEvents();
                     } catch (error) {
                         console.error('トークン処理エラー:', error);
                         error.value = 'カレンダーの読み込みに失敗しました';
@@ -851,6 +879,8 @@ createApp({
                 size: "large",
             });
             console.log('Google Sign-Inボタンをレンダリングしました。');
+            loadEvents(); // サンプルデータを表示
+
         });
 
         return {

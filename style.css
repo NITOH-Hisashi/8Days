@@ -1,8 +1,8 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 1em;
-    padding: 1em;
-    background: #f9f9f9;
+  font-family: Arial, sans-serif;
+  margin: 1em;
+  padding: 1em;
+  background: #f9f9f9;
 }
 
 .calendar-container {
@@ -28,18 +28,19 @@ body {
 }
 
 .all-day-events {
-    background: #fffae6;
-    padding: 0.5em;
-    border-bottom: 1px solid #ddd;
+  height: 60px;
+  background: #fffae6;
+  padding: 0.5em;
+  border-bottom: 1px solid #ddd;
 }
 
 .calendar-filters {
-    margin: 1em 0;
+  margin: 1em 0;
 }
 
 .time-grid {
   position: relative;
-  height: 640px;
+  height: 960px;
   background: repeating-linear-gradient(to bottom, #f0f0f0, #f0f0f0 39px, #fff 40px);
 }
 
