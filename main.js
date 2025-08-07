@@ -498,9 +498,11 @@ createApp({
         function parseJwt(token) {
             // Get the payload part
             const base64Url = token.split('.')[1];
+            console.log({ base64Url });
             // Use the new decode function
             const base64 = base64UrlDecode(base64Url);
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            console.log({ base64 });
+            const jsonPayload = decodeURIComponent(base64.split('').map(function (c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
 
