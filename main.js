@@ -670,6 +670,7 @@ createApp({
             loading.value = true;
             error.value = null;
 
+            /*
             if (!isTokenValid(accessToken.value)) {
                 error.value = createErrorState(
                     'SESSION_EXPIRED',
@@ -678,6 +679,7 @@ createApp({
                 logout();
                 return;
             }
+            */
 
             const MAX_RETRIES = 3;
             let retryCount = 0;
