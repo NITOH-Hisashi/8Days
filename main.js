@@ -349,24 +349,6 @@ createApp({
         ];
 
         /**
-         * JWTトークンをパースして、ペイロードを取得します。
-         * @param {string} token - JWTトークン
-         * @returns {Object} トークンのペイロード
-         * @throws {Error} トークンのパースに失敗した場合
-         * */
-        function isTokenValid(token) {
-            if (!token) return false;
-            try {
-                const decoded = parseJwt(token);
-                const now = Date.now() / 1000;
-                return decoded.exp > now && decoded.iat < now;
-            } catch (e) {
-                console.error('トークンの検証に失敗しました:', e);
-                return false;
-            }
-        }
-
-        /**
          * イベントを日付ごとにパースして、オブジェクトに変換します。
          * @param {Array} events - Google Calendar APIから取得したイベントの配列
          * @returns {Object} 日付をキーとするイベントのオブジェクト
@@ -402,7 +384,92 @@ createApp({
             return parsed;
         }
 
-        /** 
+        // イベントの重複チェックを効率化
+        const processedEvents = new Map();
+
+        /**
+         * イベントキャッシュをクリアします。
+         * これにより、重複イベントのチェックがリセットされます。
+         * @returns {void}
+         * @description
+         * イベントキャッシュは、イベントの重複を防ぐために使用されます。
+         * キャッシュをクリアすることで、次回のイベント読み込み時に
+         * 新しいイベントを正しく処理できるようになります。
+         * これにより、同じイベントが複数回追加されることを防ぎます。
+         */
+        function clearEventProcessingCache() {
+            processedEvents.clear();
+        }
+
+        /**
+         * イベントを処理して、日付ごとに整理します。
+         * @param {Object} item - Google Calendar APIからのイベントオブジェクト
+         * @returns {Object} 日付キーとイベントオブジェクトを含むオブジェクト
+         */
+        function processEvent(item) {
+            if (processedEvents.has(item.id)) {
+                return processedEvents.get(item.id);
+            }
+
+            const isAllDay = !!item.start.date;
+            const dateKey = isAllDay ? item.start.date : item.start.dateTime.split("T")[0];
+
+            // 既に同じイベントが存在するかチェック
+            if (eventsByDate.value[dateKey]?.some(event => event.id === item.id)) {
+                return null;
+            }
+
+            const start = isAllDay ? "00:00" : item.start.dateTime.split("T")[1].slice(0, 5);
+            const end = isAllDay ? "23:59" : item.end.dateTime.split("T")[1].slice(0, 5);
+
+            const result = {
+                dateKey,
+                event: {
+                    id: item.id,
+                    summary: item.summary,
+                    allDay: isAllDay,
+                    time: start,
+                    startTime: start,
+                    endTime: end
+                }
+            };
+            processedEvents.set(item.id, result);
+            return result;
+        };
+
+        /**
+         * JWTトークンをパースして、ペイロードを取得します。
+         * @param {string} token - JWTトークン
+         * @returns {Object} パースされたペイロード
+         */
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        /**
+         * JWTトークンをパースして、ペイロードを取得します。
+         * @param {string} token - JWTトークン
+         * @returns {Object} トークンのペイロード
+         * @throws {Error} トークンのパースに失敗した場合
+         * */
+        function isTokenValid(token) {
+            if (!token) return false;
+            try {
+                const decoded = parseJwt(token);
+                const now = Date.now() / 1000;
+                return decoded.exp > now && decoded.iat < now;
+            } catch (e) {
+                console.error('トークンの検証に失敗しました:', e);
+                return false;
+            }
+        }
+
+        /**
          * 日付をフォーマットして、ラベルとして使用します。
          * @param {string|Date} date - 日付文字列またはDateオブジェクト
          * @returns {string} フォーマットされた日付ラベル
@@ -640,73 +707,6 @@ createApp({
             console.log({ eventsByDate });
         }
 
-        // イベントの重複チェックを効率化
-        const processedEvents = new Map();
-
-        /**
-         * イベントキャッシュをクリアします。
-         * これにより、重複イベントのチェックがリセットされます。
-         * @returns {void}
-         * @description
-         * イベントキャッシュは、イベントの重複を防ぐために使用されます。
-         * キャッシュをクリアすることで、次回のイベント読み込み時に
-         * 新しいイベントを正しく処理できるようになります。
-         * これにより、同じイベントが複数回追加されることを防ぎます。
-         */
-        function clearEventProcessingCache() {
-            processedEvents.clear();
-        }
-
-        /**
-         * イベントを処理して、日付ごとに整理します。
-         * @param {Object} item - Google Calendar APIからのイベントオブジェクト
-         * @returns {Object} 日付キーとイベントオブジェクトを含むオブジェクト
-         */
-        function processEvent(item) {
-            if (processedEvents.has(item.id)) {
-                return processedEvents.get(item.id);
-            }
-
-            const isAllDay = !!item.start.date;
-            const dateKey = isAllDay ? item.start.date : item.start.dateTime.split("T")[0];
-
-            // 既に同じイベントが存在するかチェック
-            if (eventsByDate.value[dateKey]?.some(event => event.id === item.id)) {
-                return null;
-            }
-
-            const start = isAllDay ? "00:00" : item.start.dateTime.split("T")[1].slice(0, 5);
-            const end = isAllDay ? "23:59" : item.end.dateTime.split("T")[1].slice(0, 5);
-
-            const result = {
-                dateKey,
-                event: {
-                    id: item.id,
-                    summary: item.summary,
-                    allDay: isAllDay,
-                    time: start,
-                    startTime: start,
-                    endTime: end
-                }
-            };
-            processedEvents.set(item.id, result);
-            return result;
-        };
-
-        /**
-         * JWTトークンをパースして、ペイロードを取得します。
-         * @param {string} token - JWTトークン
-         * @returns {Object} パースされたペイロード
-         */
-        function parseJwt(token) {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
-        }
-
         // 定期的なキャッシュクリア
         const CACHE_CLEANUP_INTERVAL = 1000 * 60 * 60; // 1時間
 
@@ -844,15 +844,6 @@ createApp({
                     eventsByDate.value = {};
                 }
             );
-
-            // キャッシュクリーンアップのインターバル
-            const cleanup = setInterval(clearDateRangeCache, CACHE_CLEANUP_INTERVAL);
-            cleanupFunctions.push(() => clearInterval(cleanup));
-
-            // コンポーネントのアンマウント時にすべてのクリーンアップを実行
-            onUnmounted(() => {
-                cleanupFunctions.forEach(cleanup => cleanup());
-            });
 
             // Google Sign-Inボタンのレンダリング
             google.accounts.id.renderButton(document.getElementById("g_id_signin"), {
