@@ -841,10 +841,12 @@ createApp({
                         if (!accessToken.value) {
                             throw new Error('アクセストークンが取得できませんでした');
                         }
+                        /*
                         if (!isTokenValid(accessToken.value)) {
                             console.warn('トークンが期限切れです。再ログインが必要です。');
                             return;
                         }
+                        */
                         console.log('Access Token:', accessToken.value);
                         // トークンが取得できたら、カレンダーリストとイベントをロード
                         user.value = responseToken.id_token;
