@@ -1,8 +1,8 @@
 ﻿const { createApp, ref, onMounted, computed } = Vue;
 
 const LOG_CONFIG = {
-    ENABLED: process.env.NODE_ENV !== 'production',
-    LEVEL: process.env.LOG_LEVEL || 'INFO',
+    ENABLED: window.process.env.NODE_ENV !== 'production',
+    LEVEL: window.process.env.LOG_LEVEL || 'INFO',
     PREFIX: '8Days:'
 };
 
@@ -40,14 +40,14 @@ function createLogger(config) {
 
 const logger = createLogger(LOG_CONFIG);
 
-const DEBUG = process.env.NODE_ENV !== 'production';
+const DEBUG = window.process.env.NODE_ENV !== 'production';
 const LOG_LEVELS = {
     DEBUG: 0,
     INFO: 1,
     WARN: 2,
     ERROR: 3
 };
-const LOG_LEVEL = LOG_LEVELS[process.env.LOG_LEVEL] || LOG_LEVELS.INFO;
+const LOG_LEVEL = LOG_LEVELS[window.process.env.LOG_LEVEL] || LOG_LEVELS.INFO;
 /**
  * ログレベルを設定します。
  * @type {number}
