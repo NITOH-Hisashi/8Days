@@ -35,38 +35,72 @@
         </div>
 
         <div class="calendar-filters">
-            <label v-for="calendar in calendars" :key="calendar.id">
-                <input type="checkbox" v-model="visibleCalendars" :value="calendar.id" @change="loadEvents" />
+            <label 
+                v-for="calendar in calendars" 
+                :key="calendar.id"
+                class="calendar-filter"
+            >
+                <input 
+                    type="checkbox" 
+                    v-model="visibleCalendars" 
+                    :value="calendar.id" 
+                    @change="loadEvents" 
+                />
                 {{ calendar.summary }}
             </label>
         </div>
 
         <div>
             <label>開始日を選択: </label>
-            <input type="date" v-model="startDate" @change="loadEvents" />
+            <input 
+                type="date" 
+                v-model="startDate" 
+                @change="loadEvents" 
+            />
         </div>
 
         <div class="calendar-container">
-            <div class="date-column" v-for="(events, date) in eventsByDate" :key="date">
-                <div class="date-header">{{ formatDateLabel(date) }}</div>
-                <div class="day-events">
-                    <ul>
-                        <li v-for="event in eventsByDate[date] || []" :key="event.id">
-                            {{ event.time }} - {{ event.summary }}
-                        </li>
-                    </ul>
+            <div 
+                class="date-column" 
+                v-for="(events, date) in eventsByDate" 
+                :key="date"
+            >
+                <div class="date-header">
+                    {{ formatDateLabel(date) }}
                 </div>
                 <div class="all-day-events">
-                    <div v-for="event in events.filter(e => e.allDay)" class="event all-day">
+                    <div 
+                        v-for="event in events.filter(e => e.allDay)" 
+                        class="event all-day"
+                        :style="styleForEvent(event)"
+                        :key="event.id">
+                        <!-- 終日イベント表示 -->
                         {{ event.summary }}
                     </div>
                 </div>
                 <div class="time-grid">
-                    <div v-for="event in events.filter(e => !e.allDay)"
-                         class="event"
-                         :style="styleForEvent(event)">
+                    <div 
+                        v-for="event in events.filter(e => !e.allDay)"
+                        class="event"
+                        :style="styleForEvent(event)"
+                        :key="event.id"
+                    >
+                        <!-- 時間表示 -->
                         {{ event.time }} - {{ event.summary }}
                     </div>
+                </div>
+                <div class="day-events">
+                    <ul>
+                        <li
+                            v-for="event in eventsByDate[date] || []" 
+                            :key="event.id"
+                            class="event-item"
+                            :class="{ 'all-day': event.allDay }"
+                        >
+                            <!-- スケジュール表示 -->
+                            {{ event.time }} - {{ event.summary }}
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
