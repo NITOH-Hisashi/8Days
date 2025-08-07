@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Eight Days - あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</title>
+    <meta name="description" content="Eight Days - Googleカレンダーから8日間の予定を簡単に表示できるウェブアプリ">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="style.css" />
 
     <!-- Favicon -->
@@ -22,17 +25,17 @@
 <body>
     <div id="app">
         <h1 style="display:inline">Eight Days Calendar</h1>
-        <div v-if="!user">
-            <p class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</p>
-            <div id="g_id_signin"></div>
-        </div>
+        <span v-if="!user">
+            <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
+            <span id="g_id_signin"></span>
+        </span>
 
-        <div v-else>
-            <p>
-                ようこそ、{{ user.name }} さん
+        <span v-else>
+            <span>
+                <span>ようこそ、{{ user.name }} さん</span>
                 <button @click="logout">ログアウト</button>
-            </p>
-        </div>
+            </span>
+        </span>
 
         <div class="calendar-filters">
             <label 
