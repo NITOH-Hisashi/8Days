@@ -24,18 +24,18 @@
 </head>
 <body>
     <div id="app">
-        <h1 style="display:inline">Eight Days Calendar</h1>
-        <v-spacer></v-spacer>
+        <h1 style="display: inline;">Eight Days Calendar</h1>
+        <span style="float: right;">
+            <span v-if="!user">
+                <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
+                <span id="g_id_signin"></span>
+            </span>
 
-        <span v-if="!user">
-            <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
-            <span id="g_id_signin"></span>
-        </span>
-
-        <span v-else>
-            <span>
-                <span>ようこそ、{{ user.name }} さん</span>
-                <button @click="logout">ログアウト</button>
+            <span v-else>
+                <span>
+                    <span>ようこそ、{{ user.name }} さん</span>
+                    <button @click="logout">ログアウト</button>
+                </span>
             </span>
         </span>
 
