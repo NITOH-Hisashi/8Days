@@ -232,6 +232,39 @@ createApp({
             console.log(`Cleared ${oldSize} cache entries`);
         }
 
+        // 状態変更のトラッキング
+        const debugWatch = {
+            startDate: (val) => console.log('startDate changed:', val),
+            visibleCalendars: (val) => console.log('visibleCalendars changed:', val?.length),
+            loading: (val) => console.log('loading changed:', val),
+            eventsByDate: (val) => console.log('eventsByDate changed:', Object.keys(val).length)
+        };
+
+        /**
+         * デバッグ用のウォッチャーを設定します。
+         * これにより、特定の状態の変更を監視し、
+         * 変更があった場合にログを出力します。
+         * @returns {void}
+         * @description
+         * この関数は、特定の状態（startDate、visibleCalendars、loading、eventsByDateなど）の変更を監視します。
+         * 変更があった場合、対応するコールバック関数が呼び出され、
+         * 変更内容がコンソールにログ出力されます。
+         * これにより、アプリケーションの状態の変化を追跡しやすくなります。
+         * @example
+         * // デバッグウォッチャーの例
+         * debugWatch.startDate = (val) => console.log('startDate changed:', val);
+         * debugWatch.visibleCalendars = (val) => console.log('visibleCalendars changed:', val?.length);
+         * debugWatch.loading = (val) => console.log('loading changed:', val);
+         * debugWatch.eventsByDate = (val) => console.log('eventsByDate changed:', Object.keys(val).length);
+         * * // ウォッチャーの初期化
+         * Object.entries(debugWatch).forEach(([key, callback]) => {
+         *   watch(() => eval(key).value, callback, { deep: true });
+         * });
+         */
+        Object.entries(debugWatch).forEach(([key, callback]) => {
+            watch(() => eval(key).value, callback, { deep: true });
+        });
+
         const watchDeps = {
             // 日付範囲の変更監視（キャッシュクリア）
             dateRange: () => {
@@ -263,12 +296,15 @@ createApp({
                             isLoading = false;
                         }
                     }
-                }, { flush: 'post' });
+                }, {
+                    deep: true,  // ネストされた変更も検知
+                    flush: 'post' // DOM更新後に実行
+                });
             }
         };
 
         // watchの初期化
-        Object.values(watchDeps).forEach(init => init());
+        //Object.values(watchDeps).forEach(init => init());
 
         /**
          * eventsByDateの変更を監視します。
@@ -665,7 +701,10 @@ createApp({
             console.log({ calendars });
 
             try {
+                // ロード中の状態を設定
                 loading.value = true;
+                error.value = null;
+
                 if (!accessToken.value) {
                     // 未ログイン → サンプルイベントを表示
                     console.log('サンプルイベントを処理します:', sampleEvents);
@@ -681,10 +720,6 @@ createApp({
                     console.warn('開始日が設定されていません');
                     startDate.value = new Date().toISOString().split("T")[0];
                 }
-
-                // ロード中の状態を設定
-                loading.value = true;
-                error.value = null;
 
                 /*
                 if (!isTokenValid(accessToken.value)) {
@@ -847,6 +882,8 @@ createApp({
          * GoogleアカウントのIDを取得し、トークンをリクエストします。
          */
         onMounted(() => {
+            // watchの初期化
+            Object.values(watchDeps).forEach(init => init());
 
             // トークンクライアントを最初に初期化
             tokenClient.value = google.accounts.oauth2.initTokenClient({
