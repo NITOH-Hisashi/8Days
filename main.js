@@ -245,7 +245,7 @@ createApp({
                  */
                 watch([startDate, days], () => {
                     clearDateRangeCache();
-                });
+                }, { flush: 'post' });  // flush: 'post'を追加してDOMの更新後に実行
             },
             // イベントの再読み込み
             event: () => {
@@ -253,11 +253,17 @@ createApp({
                  * 日付範囲の変更を監視し、イベントを再ロードします。
                  * これにより、開始日や表示カレンダーが変更されたときにイベントが更新されます。
                  */
+                let isLoading = false;  // ローディング状態を追跡
                 watch([startDate, visibleCalendars], async () => {
-                    if (accessToken.value) {
-                        await loadEvents();
+                    if (accessToken.value && !isLoading) {
+                        try {
+                            isLoading = true;
+                            await loadEvents();
+                        } finally {
+                            isLoading = false;
+                        }
                     }
-                });
+                }, { flush: 'post' });
             }
         };
 
@@ -651,41 +657,50 @@ createApp({
          * それ以外の場合は、Google Calendar APIからイベントを取得し、日付ごとに整理します。
          */
         async function loadEvents() {
+            // 既に処理中の場合は早期リターン
+            if (loading.value) {
+                console.log('既にイベントをロード中です');
+                return;
+            }
             console.log({ calendars });
-            if (!accessToken.value) {
-                // 未ログイン → サンプルイベントを表示
-                console.log('サンプルイベントを処理します:', sampleEvents);
-                eventsByDate.value = parseEvent(sampleEvents);
-                console.log('処理済みイベント:', eventsByDate.value);
-                return;
-            }
 
-            // 開始日が未設定の場合は、今日の日付を使用
-            if (!startDate.value) {
-                console.warn('開始日が設定されていません');
-                startDate.value = new Date().toISOString().split("T")[0];
-            }
+            try {
+                loading.value = true;
+                if (!accessToken.value) {
+                    // 未ログイン → サンプルイベントを表示
+                    console.log('サンプルイベントを処理します:', sampleEvents);
+                    const parsedEvents = parseEvent(sampleEvents);
+                    // 一括で更新して不要な再レンダリングを防ぐ
+                    eventsByDate.value = { ...parsedEvents };
+                    console.log('処理済みイベント:', eventsByDate.value);
+                    return;
+                }
 
-            // ロード中の状態を設定
-            loading.value = true;
-            error.value = null;
+                // 開始日が未設定の場合は、今日の日付を使用
+                if (!startDate.value) {
+                    console.warn('開始日が設定されていません');
+                    startDate.value = new Date().toISOString().split("T")[0];
+                }
 
-            /*
-            if (!isTokenValid(accessToken.value)) {
-                error.value = createErrorState(
-                    'SESSION_EXPIRED',
-                    'セッションの有効期限が切れました'
-                );
-                logout();
-                return;
-            }
-            */
+                // ロード中の状態を設定
+                loading.value = true;
+                error.value = null;
 
-            const MAX_RETRIES = 3;
-            let retryCount = 0;
+                /*
+                if (!isTokenValid(accessToken.value)) {
+                    error.value = createErrorState(
+                        'SESSION_EXPIRED',
+                        'セッションの有効期限が切れました'
+                    );
+                    logout();
+                    return;
+                }
+                */
 
-            while (retryCount < MAX_RETRIES) {
-                try {
+                const MAX_RETRIES = 3;
+                let retryCount = 0;
+
+                while (retryCount < MAX_RETRIES) {
                     if (!visibleCalendars.value?.length) {
                         console.warn('表示するカレンダーがありません');
                         eventsByDate.value = {};
@@ -736,40 +751,40 @@ createApp({
                             }
                         }
                     }));
+                }
 
-                } catch (err) {
-                    retryCount++;
-                    logger.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
-                    console.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
+            } catch (err) {
+                retryCount++;
+                logger.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
+                console.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
 
-                    if (retryCount === MAX_RETRIES) {
-                        error.value = createErrorState(
-                            err.message.includes('セッション') ? 'SESSION_EXPIRED' : 'LOAD_ERROR',
-                            err.message,
-                            `最大リトライ回数(${MAX_RETRIES})に達しました`
-                        );
+                if (retryCount === MAX_RETRIES) {
+                    error.value = createErrorState(
+                        err.message.includes('セッション') ? 'SESSION_EXPIRED' : 'LOAD_ERROR',
+                        err.message,
+                        `最大リトライ回数(${MAX_RETRIES})に達しました`
+                    );
 
-                        if (error.value.type === 'SESSION_EXPIRED') {
-                            logout();
-                            return;  // ログアウト後は再試行しない
-                        }
-
-                        eventsByDate.value = {}; // エラー時はイベントをクリア
-                        accessToken.value = null; // アクセストークンをクリア
-                        user.value = null; // ユーザー情報をクリア
-                        calendars.value = [];
-                        visibleCalendars.value = [];
-                        throw err;
+                    if (error.value.type === 'SESSION_EXPIRED') {
+                        logout();
+                        return;  // ログアウト後は再試行しない
                     }
 
-                    // エクスポネンシャルバックオフを使用
-                    await new Promise(resolve =>
-                        // 再試行前に待機
-                        setTimeout(resolve, Math.min(1000 * Math.pow(2, retryCount), 10000))
-                    );
-                } finally {
-                    loading.value = false;
+                    eventsByDate.value = {}; // エラー時はイベントをクリア
+                    accessToken.value = null; // アクセストークンをクリア
+                    user.value = null; // ユーザー情報をクリア
+                    calendars.value = [];
+                    visibleCalendars.value = [];
+                    throw err;
                 }
+
+                // エクスポネンシャルバックオフを使用
+                await new Promise(resolve =>
+                    // 再試行前に待機
+                    setTimeout(resolve, Math.min(1000 * Math.pow(2, retryCount), 10000))
+                );
+            } finally {
+                loading.value = false;
             }
             console.log({ calendars });
             console.log({ eventsByDate });
@@ -924,8 +939,11 @@ createApp({
                 size: "large",
             });
             console.log('Google Sign-Inボタンをレンダリングしました。');
-            loadEvents(); // サンプルデータを表示
-
+            // 初回のみ実行されるように条件を追加
+            if (!eventsByDate.value || Object.keys(eventsByDate.value).length === 0) {
+                console.log('初回読み込み: サンプルデータを表示');
+                loadEvents(); // サンプルデータを表示
+            }
         });
 
         return {
