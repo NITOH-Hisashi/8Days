@@ -904,7 +904,7 @@ createApp({
                         console.log('Access Token:', accessToken.value);
                         // トークンが取得できたら、カレンダーリストとイベントをロード
                         //user.value = responseToken.id_token;
-                        user.value = parseJwt(responseToken.id_token);
+                        user.value = parseJwt(accessToken.value);
                         console.log('User info:', user.value);
                         // ロード中の状態を設定
                         loading.value = true;
