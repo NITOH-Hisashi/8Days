@@ -654,8 +654,8 @@ createApp({
                 console.log('Fetching calendar list...');
                 const data = await responseList.json();
                 if (!data.items?.length) {
-                    console.warn('カレンダーが見つかりませんでした');
-                    error.value = 'カレンダーが見つかりませんでした';
+                    console.warn('カレンダーリストが見つかりませんでした');
+                    error.value = 'カレンダーリストが見つかりませんでした';
                     // カレンダーと表示カレンダーを空に設定
                     calendars.value = [];
                     visibleCalendars.value = [];
@@ -665,7 +665,7 @@ createApp({
 
                 // カレンダーIDの配列を設定
                 visibleCalendars.value = calendars.value.map((cal) => cal.id);
-                console.log('カレンダー読み込み完了:', {
+                console.log('カレンダーリスト読み込み完了:', {
                     calendarsCount: calendars.value.length,
                     visibleCalendarsCount: visibleCalendars.value.length
                 });
@@ -772,7 +772,7 @@ createApp({
                         });
 
                         if (!responseEvents.ok) {
-                            throw new Error(`イベント取得エラー: ${responseEvents.status}`);
+                            throw new Error(`カレンダーのイベント取得に失敗: ${responseEvents.status}`);
                         }
 
                         const data = await responseEvents.json();
