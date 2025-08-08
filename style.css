@@ -40,7 +40,7 @@ body {
 
 .time-grid {
   position: relative;
-  height: 960px;
+  height: 720px;
   background: repeating-linear-gradient(to bottom, #f0f0f0, #f0f0f0 39px, #fff 40px);
 }
 
