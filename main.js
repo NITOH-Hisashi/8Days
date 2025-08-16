@@ -725,6 +725,7 @@ createApp({
                     startDate.value = new Date().toISOString().split("T")[0];
                 }
 
+                /* Invalid token specified: Unexpected token 'k', \"k@\u0012Ü~ÅÊ#\u0006\"... is not valid JSON
                 if (!isTokenValid(accessToken.value)) {
                     error.value = createErrorState(
                         'SESSION_EXPIRED',
@@ -733,6 +734,7 @@ createApp({
                     logout();
                     return;
                 }
+                */
 
                 const MAX_RETRIES = 3;
 
