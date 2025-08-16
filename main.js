@@ -570,7 +570,8 @@ createApp({
         function isTokenValid(token) {
             if (!token) return false;
             try {
-                const decoded = parseJwt(token);
+                //const decoded = parseJwt(token);
+                const decoded = jwt_decode(token);
                 const now = Date.now() / 1000;
                 // Assuming decoded has 'exp' and 'iat' properties
                 return decoded.exp > now && decoded.iat < now;
@@ -724,7 +725,6 @@ createApp({
                     startDate.value = new Date().toISOString().split("T")[0];
                 }
 
-                /*
                 if (!isTokenValid(accessToken.value)) {
                     error.value = createErrorState(
                         'SESSION_EXPIRED',
@@ -733,7 +733,6 @@ createApp({
                     logout();
                     return;
                 }
-                */
 
                 const MAX_RETRIES = 3;
 
