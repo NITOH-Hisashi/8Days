@@ -702,6 +702,7 @@ createApp({
             }
             console.log({ calendars });
 
+            let retryCount = 0;
             try {
                 // ロード中の状態を設定
                 loading.value = true;
@@ -735,7 +736,6 @@ createApp({
                 */
 
                 const MAX_RETRIES = 3;
-                let retryCount = 0;
 
                 while (retryCount < MAX_RETRIES) {
                     if (!visibleCalendars.value?.length) {
@@ -897,21 +897,17 @@ createApp({
                         if (!accessToken.value) {
                             throw new Error('アクセストークンが取得できませんでした');
                         }
-                        /*
                         if (!isTokenValid(accessToken.value)) {
                             console.warn('トークンが期限切れです。再ログインが必要です。');
                             return;
                         }
-                        */
                         console.log('Access Token:', accessToken.value);
                         // トークンが取得できたら、カレンダーリストとイベントをロード
-                        //user.value = responseToken.id_token;
-                        //user.value = parseJwt(accessToken.value);
                         console.log('User info:', user.value);
                         // ロード中の状態を設定
                         loading.value = true;
                         await loadCalendarList();
-                        //await loadEvents();
+                        await loadEvents();
                     } catch (error) {
                         console.error('トークン処理エラー:', error);
                         error.value = 'カレンダーの読み込みに失敗しました';
