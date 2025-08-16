@@ -286,6 +286,7 @@ createApp({
                  * 日付範囲の変更を監視し、イベントを再ロードします。
                  * これにより、開始日や表示カレンダーが変更されたときにイベントが更新されます。
                  */
+                /* 処理重複確認
                 let isLoading = false;  // ローディング状態を追跡
                 watch([startDate, visibleCalendars], async () => {
                     if (accessToken.value && !isLoading) {
@@ -300,6 +301,7 @@ createApp({
                     deep: true,  // ネストされた変更も検知
                     flush: 'post' // DOM更新後に実行
                 });
+                */
             }
         };
 
@@ -904,7 +906,7 @@ createApp({
                         console.log('Access Token:', accessToken.value);
                         // トークンが取得できたら、カレンダーリストとイベントをロード
                         //user.value = responseToken.id_token;
-                        user.value = parseJwt(accessToken.value);
+                        //user.value = parseJwt(accessToken.value);
                         console.log('User info:', user.value);
                         // ロード中の状態を設定
                         loading.value = true;
@@ -925,8 +927,9 @@ createApp({
                 client_id: CONFIG.GOOGLE_CLIENT_ID,
                 callback: async (responseId) => {
                     try {
-                        const decoded = parseJwt(responseId.credential);
-                        user.value = decoded;
+                        //const decoded = parseJwt(responseId.credential);
+                        const decoded = jwt_decode(responseId.credential);
+                        user.value = { name: decoded.name, email: decoded.email };
                         await tokenClient.value.requestAccessToken({ prompt: '' });
                     } catch (error) {
                         console.error('Google Sign-Inの初期化に失敗:', error);
