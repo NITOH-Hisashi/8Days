@@ -896,11 +896,13 @@ createApp({
                         if (!accessToken.value) {
                             throw new Error('アクセストークンが取得できませんでした');
                         }
+                        console.log('Access Token:', accessToken.value);
+                        /* Invalid token specified: Unexpected token 'k', "k@Ü~ÈðYw"... is not valid JSON
                         if (!isTokenValid(accessToken.value)) {
                             console.warn('トークンが期限切れです。再ログインが必要です。');
                             return;
                         }
-                        console.log('Access Token:', accessToken.value);
+                        */
                         // トークンが取得できたら、カレンダーリストとイベントをロード
                         console.log('User info:', user.value);
                         // ロード中の状態を設定
