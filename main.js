@@ -934,7 +934,6 @@ createApp({
                         console.error('Google Sign-Inの初期化に失敗:', error);
                         error.value = 'Google Sign-Inの初期化に失敗しました。';
                         return;
-
                     }
                 },
                 auto_select: true,
@@ -949,11 +948,18 @@ createApp({
                 nonce: crypto.randomUUID(),  // ランダムなnonceを生成
                 state: crypto.randomUUID(),  // ランダムなstateを生成
             });
-            google.accounts.id.prompt((notification) => {
-                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                    console.warn('Google Sign-Inのポップアップが表示されませんでした。');
-                }
-            });
+            try {
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed()) {
+                        console.warn('Google Sign-Inのポップアップが表示されませんでした。');
+                    } else if (notification.isSkippedMoment()) {
+                        console.warn('Google Sign-Inのポップアップが取り消されました。');
+                    }
+                });
+            } catch (error) {
+                console.error('Google Sign-Inのポップアップが失敗:', error);
+                error.value = 'Google Sign-Inのポップアップが失敗しました。';
+            }
 
             // クリーンアップ関数を配列に追加
             cleanupFunctions.push(
