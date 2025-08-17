@@ -703,42 +703,43 @@ createApp({
             }
             console.log({ calendars });
 
+            if (!accessToken.value) {
+                // 未ログイン → サンプルイベントを表示
+                console.log('サンプルイベントを処理します:', sampleEvents);
+                const parsedEvents = parseEvent(sampleEvents);
+                // 一括で更新して不要な再レンダリングを防ぐ
+                eventsByDate.value = { ...parsedEvents };
+                console.log('処理済みイベント:', eventsByDate.value);
+                return;
+            }
+
+            // 開始日が未設定の場合は、今日の日付を使用
+            if (!startDate.value) {
+                console.warn('開始日が設定されていません');
+                startDate.value = new Date().toISOString().split("T")[0];
+            }
+
+            /* Invalid token specified: Unexpected token 'k', \"k@\u0012Ü~ÅÊ#\u0006\"... is not valid JSON
+            if (!isTokenValid(accessToken.value)) {
+                error.value = createErrorState(
+                    'SESSION_EXPIRED',
+                    'セッションの有効期限が切れました'
+                );
+                logout();
+                return;
+            }
+            */
+
+            const MAX_RETRIES = 3;
             let retryCount = 0;
-            try {
-                // ロード中の状態を設定
-                loading.value = true;
-                error.value = null;
+            let dataFetched = false; // Flag to indicate successful fetch
+            while (retryCount < MAX_RETRIES) {
+                // while (retryCount < MAX_RETRIES && !dataFetched) {
+                try {
+                    // ロード中の状態を設定
+                    loading.value = true;
+                    error.value = null;
 
-                if (!accessToken.value) {
-                    // 未ログイン → サンプルイベントを表示
-                    console.log('サンプルイベントを処理します:', sampleEvents);
-                    const parsedEvents = parseEvent(sampleEvents);
-                    // 一括で更新して不要な再レンダリングを防ぐ
-                    eventsByDate.value = { ...parsedEvents };
-                    console.log('処理済みイベント:', eventsByDate.value);
-                    return;
-                }
-
-                // 開始日が未設定の場合は、今日の日付を使用
-                if (!startDate.value) {
-                    console.warn('開始日が設定されていません');
-                    startDate.value = new Date().toISOString().split("T")[0];
-                }
-
-                /* Invalid token specified: Unexpected token 'k', \"k@\u0012Ü~ÅÊ#\u0006\"... is not valid JSON
-                if (!isTokenValid(accessToken.value)) {
-                    error.value = createErrorState(
-                        'SESSION_EXPIRED',
-                        'セッションの有効期限が切れました'
-                    );
-                    logout();
-                    return;
-                }
-                */
-
-                const MAX_RETRIES = 3;
-
-                while (retryCount < MAX_RETRIES) {
                     if (!visibleCalendars.value?.length) {
                         console.warn('表示するカレンダーがありません');
                         eventsByDate.value = {};
@@ -789,41 +790,42 @@ createApp({
                             }
                         }
                     }));
-                }
+                    dataFetched = true; // Set the flag to true to break the loop
+                } catch (err) {
+                    retryCount++;
+                    logger.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
+                    console.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
 
-            } catch (err) {
-                retryCount++;
-                logger.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
-                console.error(`イベント読み込み失敗 (試行 ${retryCount}/${MAX_RETRIES}):`, err);
+                    if (retryCount === MAX_RETRIES) {
+                        error.value = createErrorState(
+                            err.message.includes('セッション') ? 'SESSION_EXPIRED' : 'LOAD_ERROR',
+                            err.message,
+                            `最大リトライ回数(${MAX_RETRIES})に達しました`
+                        );
 
-                if (retryCount === MAX_RETRIES) {
-                    error.value = createErrorState(
-                        err.message.includes('セッション') ? 'SESSION_EXPIRED' : 'LOAD_ERROR',
-                        err.message,
-                        `最大リトライ回数(${MAX_RETRIES})に達しました`
-                    );
+                        if (error.value.type === 'SESSION_EXPIRED') {
+                            logout();
+                            return;  // ログアウト後は再試行しない
+                        }
 
-                    if (error.value.type === 'SESSION_EXPIRED') {
-                        logout();
-                        return;  // ログアウト後は再試行しない
+                        eventsByDate.value = {}; // エラー時はイベントをクリア
+                        accessToken.value = null; // アクセストークンをクリア
+                        user.value = null; // ユーザー情報をクリア
+                        calendars.value = [];
+                        visibleCalendars.value = [];
+                        throw err;
                     }
 
-                    eventsByDate.value = {}; // エラー時はイベントをクリア
-                    accessToken.value = null; // アクセストークンをクリア
-                    user.value = null; // ユーザー情報をクリア
-                    calendars.value = [];
-                    visibleCalendars.value = [];
-                    throw err;
+                    // エクスポネンシャルバックオフを使用
+                    await new Promise(resolve =>
+                        // 再試行前に待機
+                        setTimeout(resolve, Math.min(1000 * Math.pow(2, retryCount), 10000))
+                    );
+                } finally {
+                    loading.value = false;
                 }
-
-                // エクスポネンシャルバックオフを使用
-                await new Promise(resolve =>
-                    // 再試行前に待機
-                    setTimeout(resolve, Math.min(1000 * Math.pow(2, retryCount), 10000))
-                );
-            } finally {
-                loading.value = false;
             }
+
             console.log({ calendars });
             console.log({ eventsByDate });
         }
