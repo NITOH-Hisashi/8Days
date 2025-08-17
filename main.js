@@ -733,8 +733,7 @@ createApp({
             const MAX_RETRIES = 3;
             let retryCount = 0;
             let dataFetched = false; // Flag to indicate successful fetch
-            while (retryCount < MAX_RETRIES) {
-                // while (retryCount < MAX_RETRIES && !dataFetched) {
+            while (retryCount < MAX_RETRIES && !dataFetched) {
                 try {
                     // ロード中の状態を設定
                     loading.value = true;
