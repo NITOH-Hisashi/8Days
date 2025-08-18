@@ -587,7 +587,7 @@ createApp({
          */
         function formatDateLabel(date) {
             const d = new Date(date);
-            return d.toLocaleDateString("ja-JP", { weekday: "short", month: "short", day: "numeric" });
+            return d.toLocaleDateString("ja-JP", { weekday: "short", day: "numeric" });
         }
 
         /**

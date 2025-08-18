@@ -78,7 +78,6 @@
                     <div 
                         v-for="event in events.filter(e => e.allDay)" 
                         class="event all-day"
-                        :style="styleForEvent(event)"
                         :key="event.id">
                         <!-- 終日イベント表示 -->
                         {{ event.summary }}
@@ -92,7 +91,7 @@
                         :key="event.id"
                     >
                         <!-- 時間表示 -->
-                        {{ event.time }} - {{ event.summary }}
+                        {{ event.startTime }}～{{ event.endTime }} {{ event.summary }}
                     </div>
                 </div>
                 <div class="day-events">
@@ -104,7 +103,7 @@
                             :class="{ 'all-day': event.allDay }"
                         >
                             <!-- スケジュール表示 -->
-                            {{ event.time }} - {{ event.summary }}
+                            {{ event.startTime }}～{{ event.endTime }} {{ event.summary }}
                         </li>
                     </ul>
                 </div>
