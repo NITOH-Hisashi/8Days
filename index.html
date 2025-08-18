@@ -26,6 +26,14 @@
 <body>
     <div id="app">
         <h1 style="display: inline;">Eight Days Calendar</h1>
+            <span>
+                <input 
+                    type="date" 
+                    v-model="startDate" 
+                    @change="loadEvents" 
+                />
+            </span>
+
         <span style="float: right;">
             <span v-if="!user">
                 <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
@@ -54,15 +62,6 @@
                 />
                 {{ calendar.summary }}
             </label>
-        </div>
-
-        <div>
-            <label>開始日を選択: </label>
-            <input 
-                type="date" 
-                v-model="startDate" 
-                @change="loadEvents" 
-            />
         </div>
 
         <div class="calendar-container">
