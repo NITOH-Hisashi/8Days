@@ -40,7 +40,8 @@ body {
 
 .time-grid {
   position: relative;
-  height: 720px;
+  /* 一時間当たり20px */
+  height: 480px;
   background: repeating-linear-gradient(to bottom, #f0f0f0, #f0f0f0 39px, #fff 40px);
 }
 
@@ -63,4 +64,27 @@ body {
 
 .event .title {
   font-weight: bold;
+}
+
+.calendar-filter {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  margin: 6px;
+  border: 2px solid #007BFF;
+  border-radius: 20px;
+  background-color: #f0f8ff;
+  color: #007BFF;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.calendar-filter:hover {
+  background-color: #007BFF;
+  color: white;
+}
+
+.calendar-filter input[type="checkbox"] {
+  margin-right: 8px;
 }

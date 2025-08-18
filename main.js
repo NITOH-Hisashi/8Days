@@ -599,8 +599,8 @@ createApp({
             const startHour = parseInt(event.startTime.split(":")[0]);
             const endHour = parseInt(event.endTime.split(":")[0]);
             return {
-                top: `${(startHour - 0) * 30}px`,
-                height: `${(endHour - startHour) * 30}px`
+                top: `${(startHour - 0) * 20}px`,
+                height: `${(endHour - startHour) * 20}px`
             };
         }
 
