@@ -43,7 +43,7 @@
 
             <span v-else>
                 <span>
-                    <span>ようこそ、{{ user.name }} さん</span>
+                    <span style="margin-right: 20px;">ようこそ、{{ user.name }} さん</span>
                     <button @click="logout">ログアウト</button>
                 </span>
             </span>
@@ -54,7 +54,6 @@
                 v-for="calendar in calendars" 
                 :key="calendar.id"
                 class="calendar-filter"
-                 style="margin-left: 20px;"
             >
                 <input 
                     type="checkbox" 
