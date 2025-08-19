@@ -591,6 +591,16 @@ createApp({
         }
 
         /**
+         * 今日の日付判定
+         * @param {*} date 
+         * @returns 
+         */
+        function isToday(date) {
+            const today = new Date().toISOString().split("T")[0];
+            return date === today;
+        }
+
+        /**
          * イベントのスタイルを計算します。
          * @param {Object} event - イベントオブジェクト
          * @returns {Object} スタイルオブジェクト
@@ -1022,6 +1032,7 @@ createApp({
             // その他の関数
             styleForEvent,
             formatDateLabel,
+            isToday,
         };
     }
 }).mount("#app");

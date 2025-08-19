@@ -25,51 +25,54 @@
 </head>
 <body>
     <div id="app">
-        <h1 style="display: inline;">Eight Days Calendar</h1>
+        <header>
+            <h1 style="display: inline;">Eight Days Calendar</h1>
 
-        <span style="margin-left: 20px;">
-            <input 
-                type="date" 
-                v-model="startDate" 
-                @change="loadEvents" 
-            />
-        </span>
-
-        <span style="float: right;">
-            <span v-if="!user">
-                <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
-                <span id="g_id_signin"></span>
-            </span>
-
-            <span v-else>
-                <span>
-                    <span style="margin-right: 20px;">ようこそ、{{ user.name }} さん</span>
-                    <button @click="logout">ログアウト</button>
-                </span>
-            </span>
-        </span>
-
-        <div class="calendar-filters">
-            <label 
-                v-for="calendar in calendars" 
-                :key="calendar.id"
-                class="calendar-filter"
-            >
+            <span style="margin-left: 20px;">
                 <input 
-                    type="checkbox" 
-                    v-model="visibleCalendars" 
-                    :value="calendar.id" 
+                    type="date" 
+                    v-model="startDate" 
                     @change="loadEvents" 
                 />
-                {{ calendar.summary }}
-            </label>
-        </div>
+            </span>
+
+            <span style="float: right;">
+                <span v-if="!user">
+                    <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
+                    <span id="g_id_signin"></span>
+                </span>
+
+                <span v-else>
+                    <span>
+                        <span style="margin-right: 20px;">ようこそ、{{ user.name }} さん</span>
+                        <button @click="logout">ログアウト</button>
+                    </span>
+                </span>
+            </span>
+
+            <div class="calendar-filters">
+                <label 
+                    v-for="calendar in calendars" 
+                    :key="calendar.id"
+                    class="calendar-filter"
+                >
+                    <input 
+                        type="checkbox" 
+                        v-model="visibleCalendars" 
+                        :value="calendar.id" 
+                        @change="loadEvents" 
+                    />
+                    {{ calendar.summary }}
+                </label>
+            </div>
+        </header>
 
         <div class="calendar-container">
             <div 
                 class="date-column" 
                 v-for="(events, date) in eventsByDate" 
                 :key="date"
+                :class="{ 'today': isToday(date) }"
             >
                 <div class="date-header">
                     {{ formatDateLabel(date) }}

@@ -21,6 +21,13 @@ body {
   position: relative;
 }
 
+.date-column.today {
+  border: 5px solid #57FF22;
+  border-radius: 12px;
+  padding: 8px;
+  background-color: #fff7f0;
+}
+
 .date-header {
   font-weight: bold;
   text-align: center;
