@@ -6,6 +6,30 @@ describe("Vue App Methods", () => {
     let app;
 
     beforeEach(() => {
+        global.google = {
+            accounts: {
+                id: {
+                    disableAutoSelect: vi.fn(),
+                    revoke: vi.fn(),
+                    initialize: vi.fn(),
+                    prompt: vi.fn(),
+                    cancel: vi.fn(),
+                    renderButton: vi.fn(),
+                },
+                oauth2: {
+                    initTokenClient: vi.fn(() => ({
+                        requestAccessToken: vi.fn(),
+                    })),
+                },
+            },
+        };
+
+        global.jwt_decode = vi.fn(() => ({
+            name: "Test User",
+            email: "test@example.com",
+            exp: Math.floor(Date.now() / 1000) + 3600,
+            iat: Math.floor(Date.now() / 1000),
+        }));
         app = createApp(App).mount(document.createElement("div"));
     });
 
@@ -24,15 +48,15 @@ describe("Vue App Methods", () => {
     it("should format date label correctly", () => {
         const dateStr = "2025-04-17";
         const result = app.formatDateLabel(dateStr);
-        expect(result).toBe("4/17 (–Ø)");
+        expect(result).toBe("17æ—¥(æœ¨)");
     });
 
     it("should logout user", () => {
         app.user = { name: "Test User" };
-        app.token = "test-token";
+        app.accessToken = "test-token";
         app.logout();
         expect(app.user).toBeNull();
-        expect(app.token).toBeNull();
+        expect(app.accessToken).toBeNull();
     });
 
     it("should load calendar list", async () => {
@@ -44,7 +68,7 @@ describe("Vue App Methods", () => {
                     })
             })
         );
-        app.token = "test-token";
+        app.accessToken = "test-token";
         await app.loadCalendarList();
         expect(app.calendarList).toHaveLength(1);
         expect(app.calendarList[0].summary).toBe("Test Calendar");
@@ -65,7 +89,7 @@ describe("Vue App Methods", () => {
                     })
             })
         );
-        app.token = "test-token";
+        app.accessToken = "test-token";
         app.startDate = "2025-04-17";
         app.selectedCalendars = ["cal1"];
         await app.loadEvents();
@@ -83,6 +107,6 @@ describe("Vue App Methods", () => {
         }));
         app.handleCredentialResponse(mockResponse);
         expect(app.user.name).toBe("Test User");
-        expect(app.token).toBe("test-token");
+        expect(app.accessToken).toBe("test-token");
     });
 });
