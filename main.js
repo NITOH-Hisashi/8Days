@@ -596,8 +596,10 @@ createApp({
          * @returns {Object} スタイルオブジェクト
          */
         function styleForEvent(event) {
-            const startHour = parseInt(event.startTime.split(":")[0]);
-            const endHour = parseInt(event.endTime.split(":")[0]);
+            const startHour = parseInt(event.startTime.split(":")[0])
+                + parseInt(event.startTime.split(":")[1]) / 60;
+            const endHour = parseInt(event.endTime.split(":")[0])
+                ; parseInt(event.endTime.split(":")[1]) / 60;
             return {
                 top: `${(startHour - 0) * 20}px`,
                 height: `${(endHour - startHour) * 20}px`
