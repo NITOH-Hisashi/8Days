@@ -1083,4 +1083,4 @@ if (typeof module !== 'undefined') {
     createApp(App).mount("#app");
 }
 
-global.App = App;
+globalThis.App = App;
