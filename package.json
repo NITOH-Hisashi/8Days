@@ -1,0 +1,12 @@
+{
+    "scripts": {
+        "test": "vitest"
+    },
+    "dependencies": {
+        "vitest": "^3.2.4",
+        "vue": "3.4"
+    },
+    "devDependencies": {
+        "jsdom": "^26.1.0"
+    }
+}

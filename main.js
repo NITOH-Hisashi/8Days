@@ -59,12 +59,6 @@ function log(level, ...args) {
     }
 }
 
-function log(...args) {
-    if (DEBUG) {
-        console.log(...args);
-    }
-}
-
 function logError(...args) {
     if (DEBUG) {
         console.error(...args);
@@ -137,7 +131,7 @@ const error = ref(/** @type {ErrorState|null} */ null);
  * @property {string} CONFIG.GOOGLE_API_EVENT_SHOW_HIDDEN - Google Calendar APIの非表示イベントフラグ
  * @property {string} CONFIG.GOOGLE_API_EVENT_SHOW_DELETED - Google Calendar APIの削除済みイベントフラグ
  */
-createApp({
+const App = {
     /**
      * Vue.jsコンポーネントのセットアップ関数です。
      * この関数は、コンポーネントの状態を初期化し、必要なデータやメソッドを定義します。
@@ -580,6 +574,14 @@ createApp({
             }
         }
 
+        function formatDate(date, sep = "") {
+            const yyyy = date.getFullYear();
+            const mm = ('00' + (date.getMonth() + 1)).slice(-2);
+            const dd = ('00' + date.getDate()).slice(-2);
+
+            return `${yyyy}${sep}${mm}${sep}${dd}`;
+        }
+
         /**
          * 日付をフォーマットして、ラベルとして使用します。
          * @param {string|Date} date - 日付文字列またはDateオブジェクト
@@ -588,6 +590,24 @@ createApp({
         function formatDateLabel(date) {
             const d = new Date(date);
             return d.toLocaleDateString("ja-JP", { weekday: "short", day: "numeric" });
+        }
+
+        /**
+         * 
+         * @param {*} date 
+         * @returns 
+         */
+        function formatDateKey(date) {
+            return formatDate(date, "-");
+        }
+
+        /**
+         * 
+         * @param {*} date 
+         * @returns 
+         */
+        function formatDateInput(date) {
+            return formatDate(date, "-");
         }
 
         /**
@@ -844,6 +864,12 @@ createApp({
         const CACHE_CLEANUP_INTERVAL = 1000 * 60 * 60; // 1時間
 
         // キャッシュクリーンアップのインターバル
+        const cleanup = setInterval(clearDateRangeCache, CACHE_CLEANUP_INTERVAL);
+
+        // クリーンアップ関数の配列を定義
+        const cleanupFunctions = [];
+
+        // コンポーネントのアンマウント時にすべてのクリーンアップを実行
         /**
          * コンポーネントのアンマウント時に定期的なキャッシュクリアを停止します。
          * これにより、定期的なキャッシュクリアが停止され、
@@ -875,13 +901,8 @@ createApp({
          * @see https://developer.mozilla.org/ja/docs/Web/API/WindowTimers/clearTimeout
          * @see https://developer.mozilla.org/ja/docs/Web/API/WindowTimers/setTimeout
          */
-        const cleanup = setInterval(clearDateRangeCache, CACHE_CLEANUP_INTERVAL);
-
-        // クリーンアップ関数の配列を定義
-        const cleanupFunctions = [];
-
-        // コンポーネントのアンマウント時にすべてのクリーンアップを実行
         onUnmounted(() => {
+            clearInterval(cleanup);
             // 一括クリーンアップ
             cleanupFunctions.forEach(cleanup => {
                 try {
@@ -891,6 +912,24 @@ createApp({
                 }
             });
         });
+
+        /**
+         * Google Identity Servicesの認証レスポンスを処理します。
+         * @param {Object} response - Googleからの認証レスポンス
+         */
+        function handleCredentialResponse(response) {
+            try {
+                accessToken.value = response.credential;
+                // jwt_decode ライブラリを使用してペイロードを取得
+                const decoded = jwt_decode(response.credential);
+                user.value = { name: decoded.name, email: decoded.email };
+                // トークンリクエストを発行
+                tokenClient.value.requestAccessToken({ prompt: '' });
+            } catch (error) {
+                console.error('認証レスポンスの処理に失敗:', error);
+                error.value = '認証レスポンスの処理に失敗しました';
+            }
+        }
 
         /**
          * コンポーネントのマウント時にGoogle Sign-Inを初期化します。
@@ -937,16 +976,7 @@ createApp({
             google.accounts.id.initialize({
                 client_id: CONFIG.GOOGLE_CLIENT_ID,
                 callback: async (responseId) => {
-                    try {
-                        //const decoded = parseJwt(responseId.credential);
-                        const decoded = jwt_decode(responseId.credential);
-                        user.value = { name: decoded.name, email: decoded.email };
-                        await tokenClient.value.requestAccessToken({ prompt: '' });
-                    } catch (error) {
-                        console.error('Google Sign-Inの初期化に失敗:', error);
-                        error.value = 'Google Sign-Inの初期化に失敗しました。';
-                        return;
-                    }
+                    await handleCredentialResponse(responseId);
                 },
                 auto_select: true,
                 cancel_on_tap_outside: false,
@@ -1026,13 +1056,31 @@ createApp({
 
             // リアクティブな関数
             setStartDate,
+            loadCalendarList,
             loadEvents,
             logout,
 
             // その他の関数
             styleForEvent,
             formatDateLabel,
+            formatDateKey,
+            formatDateInput,
             isToday,
+            handleCredentialResponse,
+
+            // テスト用に raw な refs をエクスポーズ
+            __raw: {
+                accessToken,
+                user,
+                calendars,
+                eventsByDate,
+            },
         };
     }
-}).mount("#app");
+};
+
+if (!module.hot) {
+    createApp(App).mount("#app");
+}
+
+export default App;

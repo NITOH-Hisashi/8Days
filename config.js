@@ -18,3 +18,6 @@ const currentEnv = location.hostname === 'localhost' ? 'development' : 'producti
 
 // Vue.jsのアプリケーションで使用できるように、windowオブジェクトに追加
 window.process = { env: ENV[currentEnv] };
+
+// CONFIG をグローバルに公開
+window.CONFIG = CONFIG;
