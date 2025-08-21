@@ -5,5 +5,7 @@
         "googleusercontent",
         "pgkhai",
         "XVCJ"
-    ]
+    ],
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": false
 }
