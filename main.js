@@ -1083,4 +1083,4 @@ if (!module.hot) {
     createApp(App).mount("#app");
 }
 
-export default App;
+global.App = App;

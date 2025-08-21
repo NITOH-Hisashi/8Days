@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createApp } from "vue";
 import "../config.js";
-import App from "../main.js";
+import "../main.js";
 
 describe("Vue App Methods", () => {
     let app;
