@@ -1079,7 +1079,7 @@ const App = {
     }
 };
 
-if (!module.hot) {
+if (typeof module !== 'undefined') {
     createApp(App).mount("#app");
 }
 
