@@ -919,6 +919,7 @@ const App = {
          */
         function handleCredentialResponse(response) {
             try {
+                accessToken.value = response.credential;
                 // jwt_decode ライブラリを使用してペイロードを取得
                 const decoded = jwt_decode(response.credential);
                 user.value = { name: decoded.name, email: decoded.email };
@@ -1066,6 +1067,14 @@ const App = {
             formatDateInput,
             isToday,
             handleCredentialResponse,
+
+            // テスト用に raw な refs をエクスポーズ
+            __raw: {
+                accessToken,
+                user,
+                calendars,
+                eventsByDate,
+            },
         };
     }
 };

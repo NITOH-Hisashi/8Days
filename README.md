@@ -6,3 +6,10 @@ Google Calendarを8日間表示するVueアプリ
 - Google Calendar APIで8日間の予定を取得
 - ログインは「Google Identity Services（新）」を使用
 - ユーザーのカレンダー（primary）を OAuth で認可して読み取りたい
+
+
+## テスト処理実行方法
+
+```bash
+npm run test
+```

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { createApp } from "vue";
+import "../config.js";
 import App from "../main.js";
 
 describe("Vue App Methods", () => {
@@ -62,28 +63,31 @@ describe("Vue App Methods", () => {
     it("should load calendar list", async () => {
         global.fetch = vi.fn(() =>
             Promise.resolve({
+                ok: true,
                 json: () =>
                     Promise.resolve({
                         items: [{ id: "cal1", summary: "Test Calendar" }]
                     })
             })
         );
-        app.accessToken = "test-token";
+        app.__raw.accessToken.value = "test-token";
         await app.loadCalendarList();
-        expect(app.calendarList).toHaveLength(1);
-        expect(app.calendarList[0].summary).toBe("Test Calendar");
+        expect(app.__raw.calendars.value).toHaveLength(1);
+        expect(app.__raw.calendars.value[0].summary).toBe("Test Calendar");
     });
 
     it("should load events", async () => {
         global.fetch = vi.fn(() =>
             Promise.resolve({
+                ok: true,
                 json: () =>
                     Promise.resolve({
                         items: [
                             {
                                 id: "event1",
                                 summary: "Test Event",
-                                start: { dateTime: "2025-04-17T10:00:00" }
+                                start: { dateTime: "2025-04-17T10:00:00" },
+                                end: { dateTime: "2025-04-17T11:00:00" }
                             }
                         ]
                     })
@@ -91,10 +95,10 @@ describe("Vue App Methods", () => {
         );
         app.accessToken = "test-token";
         app.startDate = "2025-04-17";
-        app.selectedCalendars = ["cal1"];
+        app.visibleCalendars = ["cal1"];
         await app.loadEvents();
-        expect(app.eventsByDate["2025-04-17"]).toHaveLength(1);
-        expect(app.eventsByDate["2025-04-17"][0].summary).toBe("Test Event");
+        expect(app.__raw.eventsByDate.value["2025-04-17"]).toHaveLength(1);
+        expect(app.__raw.eventsByDate.value["2025-04-17"][0].summary).toBe("Test Event");
     });
 
     it("should handle credential response", async () => {
