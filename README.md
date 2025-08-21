@@ -8,6 +8,13 @@ Google Calendarを8日間表示するVueアプリ
 - ユーザーのカレンダー（primary）を OAuth で認可して読み取りたい
 
 
+## テスト処理実行環境構築方法
+
+```bash
+npm install
+```
+
+
 ## テスト処理実行方法
 
 ```bash
