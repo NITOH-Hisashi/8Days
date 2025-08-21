@@ -1,18 +1,97 @@
-
 body {
-    font-family: Arial, sans-serif;
-    margin: 1em;
+  font-family: Arial, sans-serif;
+  margin: 1em;
+  padding: 1em;
+  background: #f9f9f9;
 }
-.calendar-table {
-  width: 100%;
-  border-collapse: collapse;
+
+.calendar-container {
+  display: flex;
+  gap: 1em;
   margin-top: 1em;
+  overflow-x: auto;
 }
-.calendar-table th, .calendar-table td {
+
+.date-column {
+  background: #fff;
   border: 1px solid #ccc;
-  vertical-align: top;
+  border-radius: 8px;
   padding: 0.5em;
+  min-width: 150px;
+  position: relative;
 }
+
+.date-column.today {
+  border: 5px solid #57FF22;
+  border-radius: 12px;
+  padding: 8px;
+  background-color: #fff7f0;
+}
+
+.date-header {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.5em;
+}
+
+.all-day-events {
+  height: 60px;
+  background: #fffae6;
+  padding: 0.5em;
+  border-bottom: 1px solid #ddd;
+}
+
 .calendar-filters {
   margin: 1em 0;
+}
+
+.time-grid {
+  position: relative;
+  /* 一時間当たり20px */
+  height: 480px;
+  background: repeating-linear-gradient(to bottom, #f0f0f0, #f0f0f0 39px, #fff 40px);
+}
+
+.event {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  background: #d0eaff;
+  border: 1px solid #80bfff;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.event:hover {
+  background: #c0dfff;
+  cursor: pointer;
+}
+
+.event .title {
+  font-weight: bold;
+}
+
+.calendar-filter {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  margin: 6px;
+  border: 2px solid #007BFF;
+  border-radius: 20px;
+  background-color: #f0f8ff;
+  color: #007BFF;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.calendar-filter:hover {
+  background-color: #007BFF;
+  color: white;
+}
+
+.calendar-filter input[type="checkbox"] {
+  margin-right: 8px;
 }
