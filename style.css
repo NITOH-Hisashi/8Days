@@ -21,17 +21,17 @@ body {
   position: relative;
 }
 
-.date-column.today {
-  border: 5px solid #57FF22;
-  border-radius: 12px;
-  padding: 8px;
-  background-color: #fff7f0;
-}
-
 .date-header {
+  border: 3px solid #FFFFFF;
+  border-radius: 12px;
   font-weight: bold;
   text-align: center;
   margin-bottom: 0.5em;
+}
+
+.date-header.today {
+  border: 3px solid #57FF22;
+  border-radius: 12px;
 }
 
 .all-day-events {
