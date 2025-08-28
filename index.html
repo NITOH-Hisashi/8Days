@@ -1,125 +1,124 @@
 ﻿<!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Eight Days Calendar - あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</title>
-    <meta name="description" content="Eight Days - Googleカレンダーから8日間の予定を簡単に表示できるウェブアプリ">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="robots" content="index, follow">
-    <link rel="stylesheet" href="style.css" />
 
-    <!-- Favicon -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Eight Days Calendar - Googleカレンダーから8日間の予定をシンプルに表示</title>
+        <meta name="description" content="Eight Days Calendar - Googleカレンダーから8日間の予定を簡単に表示できるウェブアプリ" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="robots" content="index, follow" />
+        <link rel="stylesheet" href="style.css" />
 
-    <!-- Google API Client Library を追加 -->
-    <script src="https://apis.google.com/js/api.js"></script>
+        <!-- Favicon -->
+        <link rel="icon" href="favicon.ico" type="image/x-icon" />
 
-    <!-- Google Identity Services（ログイン用） -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <!-- Google API Client Library を追加 -->
+        <script src="https://apis.google.com/js/api.js"></script>
 
-    <script src="https://unpkg.com/vue@3.4/dist/vue.global.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-    <script src="config.js" defer></script>
-    <script src="main.js" defer></script>
-</head>
-<body>
-    <div id="app">
-        <header>
-            <h1 style="display: inline;">Eight Days Calendar</h1>
+        <!-- Google Identity Services（ログイン用） -->
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-            <span style="margin-left: 20px;">
-                <input 
-                    type="date" 
-                    v-model="startDate" 
-                    @change="loadEvents" 
-                />
-            </span>
+        <script src="https://unpkg.com/vue@3.4/dist/vue.global.prod.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+        <script src="config.js" defer></script>
+        <script src="main.js" defer></script>
+    </head>
 
-            <span style="float: right;">
-                <span v-if="!user">
-                    <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
-                    <span id="g_id_signin"></span>
+    <body>
+        <div id="app">
+            <header>
+                <h1 style="display: inline;">Eight Days Calendar</h1>
+
+                <span style="margin-left: 20px;">
+                    <input
+                        type="date"
+                        v-model="startDate"
+                        @change="loadEvents" />
                 </span>
 
-                <span v-else>
-                    <span>
-                        <span style="margin-right: 20px;">ようこそ、{{ user.name }} さん</span>
-                        <button @click="logout">ログアウト</button>
+                <span style="float: right;">
+                    <span v-if="!user">
+                        <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
+                        <span id="g_id_signin"></span>
+                    </span>
+
+                    <span v-else>
+                        <span>
+                            <span style="margin-right: 20px;">ようこそ、{{ user.name }} さん</span>
+                            <button @click="logout">ログアウト</button>
+                        </span>
                     </span>
                 </span>
-            </span>
 
-            <div class="calendar-filters">
-                <label 
-                    v-for="calendar in calendars" 
-                    :key="calendar.id"
-                    class="calendar-filter"
-                >
-                    <input 
-                        type="checkbox" 
-                        v-model="visibleCalendars" 
-                        :value="calendar.id" 
-                        @change="loadEvents" 
-                    />
-                    {{ calendar.summary }}
-                </label>
-            </div>
-        </header>
+                <div class="calendar-filters">
+                    <label
+                        v-for="calendar in calendars"
+                        :key="calendar.id"
+                        class="calendar-filter">
+                        <input
+                            type="checkbox"
+                            v-model="visibleCalendars"
+                            :value="calendar.id"
+                            @change="loadEvents" />
+                        {{ calendar.summary }}
+                    </label>
+                </div>
+            </header>
 
-        <div class="calendar-container">
-            <div 
-                class="date-column" 
-                v-for="(events, date) in eventsByDate" 
-                :key="date"
-                :class="{ 'today': isToday(date) }"
-            >
-                <div class="date-header">
-                    {{ formatDateLabel(date) }}
-                </div>
-                <div class="all-day-events">
-                    <div 
-                        v-for="event in events.filter(e => e.allDay)" 
-                        class="event all-day"
-                        :key="event.id">
-                        <!-- 終日イベント表示 -->
-                        {{ event.summary }}
+            <div class="calendar-container">
+                <div
+                    class="date-column"
+                    v-for="(events, date) in eventsByDate"
+                    :key="date">
+                    <div
+                        class="date-header"
+                        :class="{ 'today': isToday(date) }">
+                        {{ formatDateLabel(date) }}
                     </div>
-                </div>
-                <div class="time-grid">
-                    <div 
-                        v-for="event in events.filter(e => !e.allDay)"
-                        class="event"
-                        :style="styleForEvent(event)"
-                        :key="event.id"
-                    >
-                        <!-- 時間表示 -->
-                        {{ event.startTime }}～{{ event.endTime }} {{ event.summary }}
+                    <div class="all-day-events">
+                        <div
+                            v-for="event in events.filter(e => e.allDay)"
+                            class="event all-day"
+                            :key="event.id">
+                            <!-- 終日イベント表示 -->
+                            {{ event.summary }}
+                        </div>
                     </div>
-                </div>
-                <div class="day-events">
-                    <ul>
-                        <li
-                            v-for="event in eventsByDate[date] || []" 
-                            :key="event.id"
-                            class="event-item"
-                            :class="{ 'all-day': event.allDay }"
-                        >
-                            <!-- スケジュール表示 -->
+                    <div class="time-grid">
+                        <div
+                            v-for="event in events.filter(e => !e.allDay)"
+                            class="event"
+                            :style="styleForEvent(event)"
+                            :key="event.id">
+                            <!-- 時間表示 -->
                             {{ event.startTime }}～{{ event.endTime }} {{ event.summary }}
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
+                    <div class="day-events">
+                        <ul>
+                            <li
+                                v-for="event in eventsByDate[date] || []"
+                                :key="event.id"
+                                class="event-item"
+                                :class="{ 'all-day': event.allDay }">
+                                <!-- スケジュール表示 -->
+                                {{ event.startTime }}～{{ event.endTime }} {{ event.summary }}
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <footer>
-            <p>
-                <a href="terms.html" target="_blank">利用規約</a> |
-                <a href="privacy.html" target="_blank">個人情報保護方針</a>
-            </p>
-            <p>Copyright AMUS IT Support</p>
-        </footer>
-    </div>
-</body>
+            <footer>
+                <p>
+                    <a href="terms.html" target="_blank">利用規約</a>
+                    |
+                    <a href="privacy.html" target="_blank">個人情報保護方針</a>
+                </p>
+                <p>Copyright AMUS IT Support</p>
+            </footer>
+        </div>
+    </body>
+
 </html>
