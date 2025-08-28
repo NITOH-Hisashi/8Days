@@ -20,3 +20,8 @@ npm install
 ```bash
 npm run test
 ```
+
+## ブラウザ画面動作確認方法
+```bash
+python3 -m http.server 8000
+```
