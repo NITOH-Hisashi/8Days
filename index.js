@@ -9,7 +9,8 @@ import {
 import './config.js';
 import {
     parseEvent,
-    isToday
+    isToday,
+    formatDateLabel
 } from './main.js';
 
 /**
