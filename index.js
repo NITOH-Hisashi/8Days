@@ -6,7 +6,6 @@ import {
     computed,
     watch,
 } from 'https://unpkg.com/vue@3.4/dist/vue.esm-browser.js';
-import jwt_decode from 'https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js';
 import './config.js';
 import './main.js';
 
