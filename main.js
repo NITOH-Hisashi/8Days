@@ -1,10 +1,10 @@
-﻿export const LOG_CONFIG = {
+﻿const LOG_CONFIG = {
     ENABLED: window.process.env.NODE_ENV !== 'production',
     LEVEL: window.process.env.LOG_LEVEL || 'INFO',
     PREFIX: '8Days:'
 };
 
-export function createLogger(config) {
+function createLogger(config) {
     const LEVELS = {
         DEBUG: 0,
         INFO: 1,
@@ -50,14 +50,14 @@ const LOG_LEVEL = LOG_LEVELS[window.process.env.LOG_LEVEL] || LOG_LEVELS.INFO;
  * ログレベルを設定します。
  * @type {number}
  */
-export function log(level, ...args) {
+function log(level, ...args) {
     if (DEBUG && level >= currentLogLevel) {
         const prefix = ['🐛 DEBUG:', 'ℹ️ INFO:', '⚠️ WARN:', '❌ ERROR:'][level];
         console.log(prefix, ...args);
     }
 }
 
-export function logError(...args) {
+function logError(...args) {
     if (DEBUG) {
         console.error(...args);
     }
@@ -68,7 +68,7 @@ export function logError(...args) {
  * @param {Array} events - Google Calendar APIから取得したイベントの配列
  * @returns {Object} 日付をキーとするイベントのオブジェクト
  */
-export function parseEvent(events) {
+function parseEvent(events) {
     if (!events || !Array.isArray(events)) {
         console.warn('Invalid events data:', events);
         return {};
@@ -133,7 +133,7 @@ export function parseEvent(events) {
  * const decoded = base64UrlDecode("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9");
  * console.log(decoded); // 出力: {"alg":"HS256","typ":"JWT"}
  */
-export function base64UrlDecode(str) {
+function base64UrlDecode(str) {
     // Replace non-url compatible chars with base64 standard chars
     str = str.replace(/-/g, '+').replace(/_/g, '/');
     // Add padding if it's missing
@@ -148,7 +148,7 @@ export function base64UrlDecode(str) {
  * @param {string} token - JWTトークン
  * @returns {Object} パースされたペイロード
  */
-export function parseJwt(token) {
+function parseJwt(token) {
     // Get the payload part
     const base64Url = token.split('.')[1];
     console.log({ base64Url });
@@ -182,7 +182,7 @@ function formatDate(date, separator = "") {
  * @param {string|Date} date - 日付文字列またはDateオブジェクト
  * @returns {string} フォーマットされた日付ラベル
  */
-export function formatDateLabel(date) {
+function formatDateLabel(date) {
     const d = new Date(date);
     return d.toLocaleDateString("ja-JP", { weekday: "short", day: "numeric" });
 }
@@ -192,7 +192,7 @@ export function formatDateLabel(date) {
  * @param {*} date 
  * @returns 
  */
-export function formatDateKey(date) {
+function formatDateKey(date) {
     return formatDate(date, "-");
 }
 
@@ -201,7 +201,7 @@ export function formatDateKey(date) {
  * @param {*} date
  * @returns
  */
-export function formatDateInput(date) {
+function formatDateInput(date) {
     return formatDate(date, "-");
 }
 
@@ -210,7 +210,7 @@ export function formatDateInput(date) {
  * @param {*} date 
  * @returns 
  */
-export function isToday(date) {
+function isToday(date) {
     const today = new Date().toISOString().split("T")[0];
     return date === today;
 }
@@ -221,7 +221,7 @@ export function isToday(date) {
  * @param {string|null} details - 詳細なエラー情報（オプション）
  * @returns {Object} エラー状態オブジェクト
  */
-export function createErrorState(type, message, details = null) {
+function createErrorState(type, message, details = null) {
     return {
         type,
         message,
