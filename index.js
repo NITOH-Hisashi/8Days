@@ -10,12 +10,6 @@ import jwt_decode from 'https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-
 import './config.js';
 import './main.js';
 
-// Google API Client Library を追加
-import "https://apis.google.com/js/api.js";
-
-// Google Identity Services（ログイン用）
-import 'https://accounts.google.com/gsi/client';
-
 // キャッシュをcomputedの外で定義
 const dateRangeCache = new Map();
 
