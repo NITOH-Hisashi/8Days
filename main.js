@@ -64,18 +64,6 @@ function logError(...args) {
 }
 
 /**
- * アプリケーションの設定オブジェクトです。
- * このオブジェクトには、Google APIの設定やOAuth 2.0の設定が含まれています。
- * @typedef {Object} ErrorState
- * @property {'SESSION_EXPIRED'|'LOAD_ERROR'|'API_ERROR'|'AUTH_ERROR'} type
- * @property {string} message
- * @property {string} timestamp
- * @property {number} [statusCode] - HTTPステータスコード（オプション）
- * @property {string} [details] - 詳細なエラー情報（オプション）
- */
-const error = ref(/** @type {ErrorState|null} */ null);
-
-/**
  * イベントを日付ごとにパースして、オブジェクトに変換します。
  * @param {Array} events - Google Calendar APIから取得したイベントの配列
  * @returns {Object} 日付をキーとするイベントのオブジェクト
