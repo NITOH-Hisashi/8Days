@@ -7,7 +7,7 @@ import {
     watch,
 } from 'https://unpkg.com/vue@3.4/dist/vue.esm-browser.js';
 import './config.js';
-import './main.js';
+import { isToday } from './main.js';
 
 /**
  * アプリケーションの設定オブジェクトです。
@@ -848,7 +848,7 @@ fetch('./index-App.htm')
                     //formatDateLabel,
                     //formatDateKey,
                     //formatDateInput,
-                    //isToday,
+                    isToday,
                     handleCredentialResponse,
 
                     // テスト用に raw な refs をエクスポーズ
