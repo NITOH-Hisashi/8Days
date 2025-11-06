@@ -1077,9 +1077,9 @@ fetch('./index-App.htm')
 
                     // その他の関数
                     styleForEvent,
-                    //formatDateLabel,
-                    //formatDateKey,
-                    //formatDateInput,
+                    formatDateLabel,
+                    formatDateKey,
+                    formatDateInput,
                     isToday,
                     handleCredentialResponse,
 
