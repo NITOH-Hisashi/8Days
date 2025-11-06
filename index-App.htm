@@ -1,0 +1,91 @@
+<header>
+    <h1 style="display: inline;">Eight Days Calendar</h1>
+
+    <span style="margin-left: 20px;">
+        <input
+            type="date"
+            v-model="startDate"
+            @change="loadEvents" />
+    </span>
+
+    <span style="float: right;">
+        <span v-if="!user">
+            <span class="tagline">あなたのGoogleカレンダーから、8日間の予定をシンプルに表示。</span>
+            <span id="g_id_signin"></span>
+        </span>
+
+        <span v-else>
+            <span>
+                <span style="margin-right: 20px;">ようこそ、{{ user.name }} さん</span>
+                <button @click="logout">ログアウト</button>
+            </span>
+        </span>
+    </span>
+
+    <div class="calendar-filters">
+        <label
+            v-for="calendar in calendars"
+            :key="calendar.id"
+            class="calendar-filter">
+            <input
+                type="checkbox"
+                v-model="visibleCalendars"
+                :value="calendar.id"
+                @change="loadEvents" />
+            {{ calendar.summary }}
+        </label>
+    </div>
+</header>
+
+<div class="calendar-container">
+    <div
+        class="date-column"
+        v-for="(events, date) in eventsByDate"
+        :key="date">
+        <div
+            class="date-header"
+            :class="{ 'today': isToday(date) }">
+            {{ formatDateLabel(date) }}
+        </div>
+        <div class="all-day-events">
+            <div
+                v-for="event in events.filter(e => e.allDay)"
+                class="event all-day"
+                :key="event.id">
+                <!-- 終日イベント表示 -->
+                {{ event.summary }}
+            </div>
+        </div>
+        <div class="time-grid">
+            <div
+                v-for="event in events.filter(e => !e.allDay)"
+                class="event"
+                :style="styleForEvent(event)"
+                :key="event.id">
+                <!-- 時間表示 -->
+                {{ event.startTime }}～{{ event.endTime }} {{ event.summary }}
+            </div>
+        </div>
+        <div class="day-events">
+            <ul>
+                <li
+                    v-for="event in eventsByDate[date] || []"
+                    :key="event.id"
+                    class="event-item"
+                    :class="{ 'all-day': event.allDay }">
+                    <!-- スケジュール表示 -->
+                    {{ event.startTime }}～{{ event.endTime }} {{ event.summary }}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>
+        <a href="terms.html" target="_blank">利用規約</a>
+        |
+        <a href="privacy.html" target="_blank">個人情報保護方針</a>
+    </p>
+    <p>Copyright AMUS IT Support</p>
+</footer>
