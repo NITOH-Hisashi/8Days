@@ -318,6 +318,22 @@ fetch('./index-App.htm')
                     return dates;
                 });
 
+                /**
+                 * イベントのスタイルを計算します。
+                 * @param {Object} event - イベントオブジェクト
+                 * @returns {Object} スタイルオブジェクト
+                 */
+                function styleForEvent(event) {
+                    const startHour = parseInt(event.startTime.split(":")[0])
+                        + parseInt(event.startTime.split(":")[1]) / 60;
+                    const endHour = parseInt(event.endTime.split(":")[0])
+                        + parseInt(event.endTime.split(":")[1]) / 60;
+                    return {
+                        top: `${(startHour - 0) * 20}px`,
+                        height: `${(endHour - startHour) * 20}px`
+                    };
+                }
+
                 // 状態変更のトラッキング
                 const debugWatch = {
                     startDate: (val) => console.log('startDate changed:', val),
@@ -406,6 +422,7 @@ fetch('./index-App.htm')
                     calendars: (newValue) => newValue.length,
                     visibleCalendars: (newValue) => newValue.length
                 };
+
                 // watch関数の重複を解消
                 Object.entries(watchConfig).forEach(([key, formatter]) => {
                     watch([key], (newValue) => {

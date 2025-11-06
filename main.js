@@ -215,22 +215,6 @@ function isToday(date) {
     return date === today;
 }
 
-/**
- * イベントのスタイルを計算します。
- * @param {Object} event - イベントオブジェクト
- * @returns {Object} スタイルオブジェクト
- */
-function styleForEvent(event) {
-    const startHour = parseInt(event.startTime.split(":")[0])
-        + parseInt(event.startTime.split(":")[1]) / 60;
-    const endHour = parseInt(event.endTime.split(":")[0])
-        + parseInt(event.endTime.split(":")[1]) / 60;
-    return {
-        top: `${(startHour - 0) * 20}px`,
-        height: `${(endHour - startHour) * 20}px`
-    };
-}
-
 /** エラー状態をより詳細に管理
  * @param {'SESSION_EXPIRED'|'LOAD_ERROR'|'API_ERROR'|'AUTH_ERROR'} type - エラーの種類
  * @param {string} message - エラーメッセージ
@@ -245,12 +229,4 @@ function createErrorState(type, message, details = null) {
         details,
         statusCode: null
     };
-}
-
-const App = {
-    setup() {
-
-        // watchの初期化
-        //Object.values(watchDeps).forEach(init => init());
-    }
 };
