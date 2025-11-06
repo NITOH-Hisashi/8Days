@@ -7,7 +7,10 @@ import {
     watch,
 } from 'https://unpkg.com/vue@3.4/dist/vue.esm-browser.js';
 import './config.js';
-import { isToday } from './main.js';
+import {
+    parseEvent,
+    isToday
+} from './main.js';
 
 /**
  * アプリケーションの設定オブジェクトです。
