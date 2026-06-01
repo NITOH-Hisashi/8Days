@@ -3,7 +3,7 @@
         "test": "vitest"
     },
     "dependencies": {
-        "vitest": "^3.2.4",
+        "vitest": "^4.1.8",
         "vue": "3.4"
     },
     "devDependencies": {
